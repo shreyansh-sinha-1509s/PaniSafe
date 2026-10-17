@@ -1,0 +1,13 @@
+[
+  {
+    "id": "FB-1792233033155-405",
+    "name": "Verifier",
+    "email": "test@panisafe.in",
+    "subject": "General Inquiry",
+    "category": "General",
+    "message": "API verification test",
+    "submittedAt": "2026-10-17T10:30:33.155Z",
+    "status": "Received",
+    "storedLocally": true
+  }
+]
