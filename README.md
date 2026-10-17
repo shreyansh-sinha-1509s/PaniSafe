@@ -1,4 +1,4 @@
-# Pani Safe — Professional Groundwater Quality Monitoring & Risk Screening Platform
+## Pani Safe — Professional Groundwater Quality Monitoring & Risk Screening Platform
 
 [![IBM Z Datathon 2026](https://img.shields.io/badge/IBM%20Z-Datathon%202026-052F5F?style=for-the-badge&logo=ibm)](https://www.ibm.com/community/z/)
 [![LinuxONE Architecture](https://img.shields.io/badge/Architecture-s390x%20%7C%20x86__64-0D9488?style=for-the-badge)](https://www.ibm.com/it-infrastructure/linuxone)
