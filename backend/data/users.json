@@ -1,0 +1,12 @@
+[
+  {
+    "id": "usr_demo_01",
+    "fullName": "Dr. Ananya Deshmukh (Demo)",
+    "email": "analyst.demo@panisafe.in",
+    "passwordHash": "$2a$10$7aQYeG4uu3xgbkPxE7pmMOa5PobrPonU.SfQlgCOVz1I2sSHOzZfu",
+    "role": "Environmental Analyst",
+    "organization": "Independent Water Quality Researcher",
+    "isDemoAccount": true,
+    "createdAt": "2026-10-17T10:29:52.599Z"
+  }
+]
