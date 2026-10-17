@@ -17,16 +17,13 @@ import {
   ShieldAlert,
   MapPin,
   CheckCircle2,
-  AlertTriangle,
   RotateCcw,
   Download,
-  Filter,
   Eye,
   Activity,
   Layers,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
   FileSpreadsheet
 } from 'lucide-react';
 
@@ -52,7 +49,7 @@ export default function DashboardPage({ navigate }) {
     endYear: ''
   });
 
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -115,7 +112,7 @@ export default function DashboardPage({ navigate }) {
     }
 
     loadTableRecords();
-  }, [filters, pagination.page]);
+  }, [filters, pagination.page, pagination.limit]);
 
   const handleFilterChange = (key, val) => {
     setFilters(prev => ({ ...prev, [key]: val }));
@@ -170,7 +167,7 @@ export default function DashboardPage({ navigate }) {
           <div>
             <h1 className="page-title">Groundwater Quality Screening Dashboard</h1>
             <p className="page-subtitle">
-              Interactive analytics and preliminary risk screening synthesized from Central Ground Water Board (CGWB) historical records across Maharashtra.
+              Interactive analytics and decision-support screening based on a deterministic synthetic benchmark dataset modeled on Maharashtra regional hydrogeology and BIS IS 10500:2012 standards.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -185,17 +182,23 @@ export default function DashboardPage({ navigate }) {
           </div>
         </div>
 
+        {error && (
+          <AlertNotice type="danger" title="Engine Communication Error">
+            {error}. Verify that the Pani Safe backend service is active.
+          </AlertNotice>
+        )}
+
         {/* Disclaimer Notice */}
         <AlertNotice type="disclaimer" title="Decision-Support Screening Notice">
-          Screening flags indicate measurements exceeding preliminary thresholds (pH &lt; 6.5 or &gt; 8.5; TDS &gt; 500 mg/L). Flagged records are prioritized for field investigation and <strong>do not constitute confirmed health hazards or drinking-water compliance certifications</strong>.
+          Screening flags indicate measurements exceeding preliminary thresholds (pH &lt; 6.5 or &gt; 8.5; TDS &gt; 500 mg/L per BIS IS 10500:2012). Flagged records indicate stations prioritized for field laboratory verification and <strong>do not constitute confirmed health hazards or drinking-water compliance certifications</strong>.
         </AlertNotice>
 
         {/* KPI Metrics Grid */}
         <div className="metrics-grid">
           <MetricCard
-            title="Total Historical Records"
+            title="Total Benchmark Records"
             value={summaryData ? summaryData.totalRecords : '...'}
-            subtext="Cleaned historical samples"
+            subtext="Synthetic benchmark samples"
             icon={Database}
             accent="#0F382A"
           />

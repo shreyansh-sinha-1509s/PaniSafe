@@ -15,6 +15,7 @@
     "generate-data": "npm --prefix backend run generate-data",
     "build:frontend": "npm --prefix frontend run build",
     "build": "npm --prefix frontend run build",
+    "test": "npm --prefix backend test",
     "dev": "node -e \"const { spawn } = require('child_process'); spawn('npm', ['--prefix', 'backend', 'run', 'dev'], { stdio: 'inherit', shell: true }); spawn('npm', ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', shell: true });\""
   },
   "keywords": [

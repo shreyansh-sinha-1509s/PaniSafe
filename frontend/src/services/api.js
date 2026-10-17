@@ -1,4 +1,4 @@
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export async function fetchHealth() {
   const res = await fetch(`${BASE_URL}/health`);
@@ -100,7 +100,7 @@ export async function submitFeedback(payload) {
 }
 
 export async function loginUser(email, password) {
-  const res = await fetch('/api/auth/login', {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -111,7 +111,7 @@ export async function loginUser(email, password) {
 }
 
 export async function registerUser(fullName, email, password, organization) {
-  const res = await fetch('/api/auth/register', {
+  const res = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fullName, email, password, organization })
@@ -122,7 +122,7 @@ export async function registerUser(fullName, email, password, organization) {
 }
 
 export async function fetchCurrentUser(token) {
-  const res = await fetch('/api/auth/me', {
+  const res = await fetch(`${BASE_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   const data = await res.json();

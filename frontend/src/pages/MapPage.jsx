@@ -2,16 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { fetchDistricts, fetchStations } from '../services/api';
 import LeafletMap from '../components/LeafletMap';
 import AlertNotice from '../components/AlertNotice';
-import MetricCard from '../components/MetricCard';
 import {
   MapPin,
-  Filter,
-  Layers,
   RotateCcw,
   ShieldAlert,
-  CheckCircle2,
-  ExternalLink,
-  Search
+  CheckCircle2
 } from 'lucide-react';
 
 export default function MapPage({ navigate }) {
@@ -81,14 +76,14 @@ export default function MapPage({ navigate }) {
           <div>
             <h1 className="page-title">Maharashtra Groundwater Geographic Overview</h1>
             <p className="page-subtitle">
-              Spatial exploration of Central Ground Water Board monitoring stations. Stations are plotted using verified coordinates and colored by preliminary screening status.
+              Spatial exploration of simulated monitoring stations across Maharashtra. Station coordinates are modeled around district centroids for prototype evaluation and colored by preliminary screening status.
             </p>
           </div>
         </div>
 
         {/* Disclaimer */}
-        <AlertNotice type="disclaimer" title="Spatial & Coordinate Validation Note">
-          Station markers reflect historical Central Ground Water Board coordinate registries. Markers indicate whether past chemistry records crossed preliminary screening thresholds. <strong>Historical spatial distribution does not depict live water contamination plumes or municipal water supply networks.</strong>
+        <AlertNotice type="disclaimer" title="Spatial & Coordinate Simulation Note">
+          Station markers reflect simulated coordinates modeled around Maharashtra district centroids for prototype evaluation. Markers indicate whether synthetic benchmark records crossed preliminary screening benchmarks. <strong>Simulated coordinates do not identify physical private wellheads, live water contamination plumes, or municipal water supply networks.</strong>
         </AlertNotice>
 
         {/* Filters */}
@@ -193,6 +188,8 @@ export default function MapPage({ navigate }) {
             <LeafletMap
               stations={filteredStations}
               height="580px"
+              selectedStationId={selectedStation ? selectedStation.stationId : null}
+              onSelectStation={setSelectedStation}
               onViewStationProfile={(stId) => navigate(`/stations/${stId}`)}
             />
           )}

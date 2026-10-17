@@ -8,14 +8,10 @@ import {
   AlertTriangle,
   RotateCcw,
   Download,
-  Filter,
   Eye,
   Activity,
-  Layers,
   ChevronLeft,
-  ChevronRight,
-  Info,
-  CheckCircle2
+  ChevronRight
 } from 'lucide-react';
 
 export default function AlertsPage({ navigate }) {
@@ -138,7 +134,7 @@ export default function AlertsPage({ navigate }) {
 
         {/* Scientific Disclaimer */}
         <AlertNotice type="warning" title="Neutral Screening Terminology Notice">
-          Screening flags identify records exceeding preliminary benchmark values: <strong>pH outside 6.5–8.5</strong> or <strong>TDS exceeding 500 mg/L</strong>. In accordance with environmental monitoring standards, these are classified as <em>"Review Recommended"</em> or <em>"Selected Threshold Exceeded"</em>. They <strong>must not be labeled as 'toxic', 'dangerous', or 'confirmed contaminated'</strong> without physical resanpling and complete microbiological and toxicological laboratory testing.
+          Screening flags identify records exceeding preliminary benchmark values: <strong>pH outside 6.5–8.5</strong> or <strong>TDS exceeding 500 mg/L</strong>. In accordance with environmental monitoring standards, these are classified as <em>"Review Recommended"</em> or <em>"Selected Threshold Exceeded"</em>. They <strong>must not be labeled as 'toxic', 'dangerous', or 'confirmed contaminated'</strong> without physical resampling and complete microbiological and toxicological laboratory testing.
         </AlertNotice>
 
         {/* Flag Metric Breakdown Cards */}

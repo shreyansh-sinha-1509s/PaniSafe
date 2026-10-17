@@ -7,12 +7,9 @@ import {
 } from 'recharts';
 import {
   MapPin,
-  Calendar,
   Activity,
   ArrowLeft,
   ShieldAlert,
-  CheckCircle2,
-  AlertTriangle,
   FileSpreadsheet,
   Info
 } from 'lucide-react';

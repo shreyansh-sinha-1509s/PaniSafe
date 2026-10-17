@@ -71,7 +71,7 @@ export default function LeafletMap({
             height: 14px;
             border-radius: 50%;
             background-color: ${markerColor};
-            border: 2px solid #FFFFFF;
+            border: 2px solid ${borderColor};
             box-shadow: 0 1px 4px rgba(0,0,0,0.3);
             transition: transform 0.15s ease;
           "></div>
@@ -81,6 +81,10 @@ export default function LeafletMap({
       });
 
       const marker = L.marker([st.latitude, st.longitude], { icon: customIcon });
+
+      marker.on('click', () => {
+        if (onSelectStation) onSelectStation(st);
+      });
 
       const popupHtml = `
         <div style="font-family: system-ui, sans-serif; padding: 2px; min-width: 180px;">
@@ -140,7 +144,14 @@ export default function LeafletMap({
 
       markersLayer.addLayer(marker);
     });
-  }, [stations, onViewStationProfile]);
+
+    if (selectedStationId) {
+      const match = stations.find(s => s.stationId === selectedStationId);
+      if (match && match.latitude && match.longitude) {
+        map.setView([match.latitude, match.longitude], 11);
+      }
+    }
+  }, [stations, selectedStationId, onSelectStation, onViewStationProfile]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height, borderRadius: '10px', overflow: 'hidden' }}>

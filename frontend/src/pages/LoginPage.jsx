@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AlertNotice from '../components/AlertNotice';
 import Logo from '../components/Logo';
-import { LogIn, Key, Mail, ArrowRight, ShieldCheck, UserCheck } from 'lucide-react';
+import { Key, Mail, ArrowRight, UserCheck } from 'lucide-react';
 
 export default function LoginPage({ navigate }) {
   const { login, demoLogin, isAuthenticated } = useAuth();

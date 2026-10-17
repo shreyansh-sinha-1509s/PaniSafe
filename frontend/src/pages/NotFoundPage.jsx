@@ -1,5 +1,4 @@
-import React from 'react';
-import { Compass, ArrowLeft, Home } from 'lucide-react';
+import { Compass, Home } from 'lucide-react';
 
 export default function NotFoundPage({ navigate }) {
   return (

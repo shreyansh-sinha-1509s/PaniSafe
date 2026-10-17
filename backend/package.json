@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "generate-data": "node src/utils/generateData.js"
+    "generate-data": "node src/utils/generateData.js",
+    "test": "node --test test/verify.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

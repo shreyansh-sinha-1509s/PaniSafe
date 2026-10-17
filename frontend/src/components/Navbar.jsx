@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X, User, LogOut, ShieldAlert, Database, MapPin, BarChart3, HelpCircle, FileText, Mail, LogIn } from 'lucide-react';
+import { Menu, X, LogOut, LogIn } from 'lucide-react';
 
 export default function Navbar({ currentPath, navigate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -51,11 +51,11 @@ export default function Navbar({ currentPath, navigate }) {
             borderRadius: '50%',
             background: '#2DD4BF'
           }} />
-          <span>IBM Z Datathon 2026 Prototype — CGWB Maharashtra Groundwater Screening Engine</span>
+          <span>IBM Z Datathon 2026 (SSF2026) • Synthetic Demonstration Dataset • Decision-Support Screening Prototype</span>
         </div>
         <div style={{ display: 'none', mdDisplay: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ color: '#94A3B8' }}>LinuxONE s390x Compatible</span>
-          <span style={{ color: '#2DD4BF', fontWeight: 600 }}>Decision-Support Prototype</span>
+          <span style={{ color: '#94A3B8' }}>LinuxONE s390x Ready</span>
+          <span style={{ color: '#2DD4BF', fontWeight: 600 }}>18,249 Benchmark Records (Not Lab Certification)</span>
         </div>
       </div>
 

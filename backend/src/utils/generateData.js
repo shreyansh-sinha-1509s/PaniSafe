@@ -6,6 +6,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, '../../data');
 
+// Default reproducible seed for deterministic synthesis
+export const DEFAULT_SYNTHETIC_SEED = 20260427;
+
+// Mulberry32 deterministic 32-bit PRNG
+export function createPRNG(seed = DEFAULT_SYNTHETIC_SEED) {
+  let s = (seed >>> 0);
+  return function () {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 const MAHARASHTRA_DISTRICTS = [
   { name: 'Ahmednagar', lat: 19.0952, lon: 74.7496, stations: 65 },
   { name: 'Akola', lat: 20.7002, lon: 77.0082, stations: 48 },
@@ -48,21 +62,7 @@ const MAHARASHTRA_DISTRICTS = [
 const VILLAGE_PREFIXES = ['Khed', 'Wad', 'Pimpal', 'Shir', 'Bhav', 'Chinch', 'Bori', 'Nand', 'Degaon', 'Manjar', 'Kasba', 'Dharm', 'Raj', 'Govind', 'Rampur', 'Son'];
 const VILLAGE_SUFFIXES = ['gaon', 'wadi', 'khed', 'pur', 'ur', 'ner', 'bad', 'vali', 'kheda', 'oli'];
 
-function randomFloat(min, max, decimals = 2) {
-  const val = Math.random() * (max - min) + min;
-  return parseFloat(val.toFixed(decimals));
-}
-
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function seededRandom(seed) {
-  let s = Math.sin(seed++) * 10000;
-  return s - Math.floor(s);
-}
-
-export function generateCGWBMaharashtraData(targetRecords = 18249) {
+export function generateCGWBMaharashtraData(targetRecords = 18249, seed = DEFAULT_SYNTHETIC_SEED) {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
@@ -70,7 +70,18 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
   const resultsPath = path.join(DATA_DIR, 'pani_safe_results.csv');
   const alertsPath = path.join(DATA_DIR, 'pani_safe_alerts.csv');
 
-  // Build station pool of ~1,758 unique stations across 35 districts
+  const rng = createPRNG(seed);
+
+  function randomFloat(min, max, decimals = 2) {
+    const val = rng() * (max - min) + min;
+    return parseFloat(val.toFixed(decimals));
+  }
+
+  function randomInt(min, max) {
+    return Math.floor(rng() * (max - min + 1)) + min;
+  }
+
+  // Build station pool across districts
   const stationPool = [];
   let stationCounter = 1;
 
@@ -79,18 +90,18 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
       const vPrefix = VILLAGE_PREFIXES[randomInt(0, VILLAGE_PREFIXES.length - 1)];
       const vSuffix = VILLAGE_SUFFIXES[randomInt(0, VILLAGE_SUFFIXES.length - 1)];
       const villageName = `${vPrefix}${vSuffix}`;
-      const stationCode = `CGWB-MH-${dist.name.substring(0, 3).toUpperCase()}-${String(stationCounter).padStart(4, '0')}`;
+      const stationCode = `SYN-MH-${dist.name.substring(0, 3).toUpperCase()}-${String(stationCounter).padStart(4, '0')}`;
       
-      // Slight coordinate offset around district center
-      const latOffset = (Math.random() - 0.5) * 0.45;
-      const lonOffset = (Math.random() - 0.5) * 0.45;
+      // Coordinate offset around district centroid (simulated point)
+      const latOffset = (rng() - 0.5) * 0.45;
+      const lonOffset = (rng() - 0.5) * 0.45;
       const lat = parseFloat((dist.lat + latOffset).toFixed(4));
       const lon = parseFloat((dist.lon + lonOffset).toFixed(4));
 
       stationPool.push({
         stationId: stationCode,
-        stationName: `${villageName} Dug Well #${randomInt(1, 4)}`,
-        agency: 'CGWB',
+        stationName: `${villageName} Observation Well #${randomInt(1, 4)}`,
+        agency: 'CGWB (Simulated Demo)',
         state: 'Maharashtra',
         district: dist.name,
         tehsil: `${dist.name} Taluka`,
@@ -98,16 +109,15 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
         village: villageName,
         latitude: lat,
         longitude: lon,
-        // Baseline water quality profile for station
         basePh: randomFloat(6.8, 8.2, 2),
         baseTds: randomFloat(250, 750, 1),
-        riskTendency: Math.random() < 0.28 // ~28% of stations have elevated readings
+        riskTendency: rng() < 0.28
       });
       stationCounter++;
     }
   }
 
-  console.log(`Generated ${stationPool.length} unique CGWB stations across ${MAHARASHTRA_DISTRICTS.length} districts.`);
+  console.log(`[SYNTHETIC GENERATOR] Built ${stationPool.length} simulated stations across ${MAHARASHTRA_DISTRICTS.length} districts with seed ${seed}.`);
 
   const headers = [
     'Station',
@@ -132,7 +142,8 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
     'Magnesium (mg/L)',
     'pH_Flag',
     'TDS_Flag',
-    'Needs_Review'
+    'Needs_Review',
+    'Data_Provenance'
   ];
 
   const resultsRows = [];
@@ -142,19 +153,17 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
   const endYear = 2024;
 
   for (let r = 0; r < targetRecords; r++) {
-    // Select station
     const st = stationPool[r % stationPool.length];
     
-    // Sampling date spread across years (pre-monsoon May, post-monsoon Nov typical for CGWB)
+    // Sampling date (pre-monsoon May, post-monsoon Nov typical cadence)
     const year = randomInt(startYear, endYear);
-    const isPreMonsoon = Math.random() < 0.5;
+    const isPreMonsoon = rng() < 0.5;
     const month = isPreMonsoon ? 5 : 11;
     const day = randomInt(1, 28);
     const hour = randomInt(8, 16);
     const minute = randomInt(0, 59);
     const samplingTime = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
 
-    // Realistic chemistry generation
     let ph = null;
     let tds = null;
     let ec = null;
@@ -166,25 +175,23 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
     let calcium = null;
     let magnesium = null;
 
-    // Missingness simulation (realistic historical gaps ~4-8%)
-    const hasPh = Math.random() > 0.04;
-    const hasTds = Math.random() > 0.05;
+    // Realistic missingness simulation (~4-6%)
+    const hasPh = rng() > 0.04;
+    const hasTds = rng() > 0.05;
 
     if (hasPh) {
-      if (st.riskTendency && Math.random() < 0.22) {
-        // Elevated or low pH flag
-        ph = Math.random() < 0.35 ? randomFloat(5.8, 6.4, 2) : randomFloat(8.55, 9.4, 2);
+      if (st.riskTendency && rng() < 0.22) {
+        ph = rng() < 0.35 ? randomFloat(5.8, 6.4, 2) : randomFloat(8.55, 9.4, 2);
       } else {
         ph = randomFloat(6.6, 8.4, 2);
       }
     }
 
     if (hasTds) {
-      // Small percentage of unverified zero TDS readings to handle correctly
-      if (Math.random() < 0.015) {
-        tds = 0; // Unverified / missing marker in original CGWB data
-      } else if (st.riskTendency && Math.random() < 0.45) {
-        // Elevated TDS flag (> 500 mg/L)
+      // Small fraction of unverified 0 readings (sensor default)
+      if (rng() < 0.015) {
+        tds = 0;
+      } else if (st.riskTendency && rng() < 0.45) {
         tds = randomFloat(510, 1650, 1);
       } else {
         tds = randomFloat(120, 490, 1);
@@ -192,7 +199,7 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
     }
 
     if (tds !== null && tds > 0) {
-      ec = Math.round(tds * 1.56 + (Math.random() - 0.5) * 30);
+      ec = Math.round(tds * 1.56 + (rng() - 0.5) * 30);
       chloride = Math.round(tds * randomFloat(0.12, 0.28, 3));
       fluoride = randomFloat(0.2, 1.8, 2);
       nitrate = Math.round(randomFloat(5, 75, 1));
@@ -202,8 +209,8 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
       magnesium = Math.round(hardness * 0.25);
     }
 
-    // Flags computation matching JupyterLab screening logic
-    // pH flag: below 6.5 or above 8.5 (only if pH is valid 0-14)
+    // IS 10500:2012 screening benchmarks:
+    // pH: acceptable 6.5 - 8.5 (values outside 0-14 excluded as instrument error)
     let phFlag = false;
     if (ph !== null && ph >= 0 && ph <= 14) {
       if (ph < 6.5 || ph > 8.5) {
@@ -211,13 +218,12 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
       }
     }
 
-    // TDS flag: above 500 mg/L (0 is treated as unverified/missing)
+    // TDS: acceptable threshold 500 mg/L (0 treated as unverified/missing)
     let tdsFlag = false;
     if (tds !== null && tds > 500) {
       tdsFlag = true;
     }
 
-    // Needs review: true if either flag is true
     const needsReview = phFlag || tdsFlag;
 
     const row = [
@@ -243,7 +249,8 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
       magnesium !== null ? magnesium : '',
       phFlag ? 'TRUE' : 'FALSE',
       tdsFlag ? 'TRUE' : 'FALSE',
-      needsReview ? 'TRUE' : 'FALSE'
+      needsReview ? 'TRUE' : 'FALSE',
+      '"SYNTHETIC_DEMO"'
     ];
 
     resultsRows.push(row.join(','));
@@ -252,25 +259,26 @@ export function generateCGWBMaharashtraData(targetRecords = 18249) {
     }
   }
 
-  // Write files
   const resultsContent = [headers.join(','), ...resultsRows].join('\n');
   const alertsContent = [headers.join(','), ...alertsRows].join('\n');
 
   fs.writeFileSync(resultsPath, resultsContent, 'utf8');
   fs.writeFileSync(alertsPath, alertsContent, 'utf8');
 
-  console.log(`Successfully generated:`);
-  console.log(`- ${resultsPath}: ${resultsRows.length} records`);
-  console.log(`- ${alertsPath}: ${alertsRows.length} flagged alert records`);
+  console.log(`[SYNTHETIC GENERATOR SUCCESS]`);
+  console.log(`- ${resultsPath}: ${resultsRows.length} rows`);
+  console.log(`- ${alertsPath}: ${alertsRows.length} flagged rows`);
 
   return {
     resultsCount: resultsRows.length,
     alertsCount: alertsRows.length,
-    stationsCount: stationPool.length
+    stationsCount: stationPool.length,
+    districtsCount: MAHARASHTRA_DISTRICTS.length,
+    seed
   };
 }
 
-// Run if called directly
+// Run if executed directly
 if (process.argv[1] && process.argv[1].endsWith('generateData.js')) {
-  generateCGWBMaharashtraData(18249);
+  generateCGWBMaharashtraData(18249, DEFAULT_SYNTHETIC_SEED);
 }

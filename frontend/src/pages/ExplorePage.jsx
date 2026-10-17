@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { fetchDistricts, fetchRecords, getExportUrl } from '../services/api';
 import RecordDrawer from '../components/RecordDrawer';
-import AlertNotice from '../components/AlertNotice';
 import {
   Search,
-  Filter,
   Download,
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  Eye,
-  SlidersHorizontal,
-  Table as TableIcon
+  Eye
 } from 'lucide-react';
 
 export default function ExplorePage({ navigate }) {

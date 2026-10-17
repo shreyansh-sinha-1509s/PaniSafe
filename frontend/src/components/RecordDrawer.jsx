@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, MapPin, Calendar, Activity, CheckCircle2, AlertTriangle, AlertCircle, ShieldAlert } from 'lucide-react';
+import { X, ExternalLink, MapPin, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export default function RecordDrawer({ record, onClose, onNavigateStation }) {
   if (!record) return null;
@@ -102,7 +102,7 @@ export default function RecordDrawer({ record, onClose, onNavigateStation }) {
             </div>
             <div>
               <span style={{ color: '#7E938B', display: 'block', fontSize: '0.75rem' }}>Agency</span>
-              <strong>{record.agency || 'CGWB'}</strong>
+              <strong>{record.agency || 'CGWB (Simulated Demo)'}</strong>
             </div>
             <div>
               <span style={{ color: '#7E938B', display: 'block', fontSize: '0.75rem' }}>District / Taluka</span>
@@ -122,7 +122,7 @@ export default function RecordDrawer({ record, onClose, onNavigateStation }) {
         {/* Primary Screening Parameters */}
         <div style={{ marginBottom: '24px' }}>
           <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4B5E57', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
-            Primary Screening Chemistry
+            Primary Screening Chemistry (BIS IS 10500:2012)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div style={{
@@ -133,7 +133,7 @@ export default function RecordDrawer({ record, onClose, onNavigateStation }) {
             }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#4B5E57' }}>pH (Potential of Hydrogen)</span>
               <div style={{ marginTop: '4px' }}>
-                {renderParamValue(record.ph, '', 'Screening: 6.5 - 8.5')}
+                {renderParamValue(record.ph, '', 'Acceptable: 6.5 - 8.5')}
               </div>
               <span style={{
                 display: 'inline-block',
@@ -142,7 +142,7 @@ export default function RecordDrawer({ record, onClose, onNavigateStation }) {
                 fontWeight: 600,
                 color: record.phFlag ? '#DC2626' : '#16A34A'
               }}>
-                {record.phFlag ? '● Flagged: Out of range' : '● Within range'}
+                {record.phFlag ? '● Flagged: Outside acceptable range (6.5 - 8.5)' : '● Within acceptable range'}
               </span>
             </div>
 
@@ -154,16 +154,18 @@ export default function RecordDrawer({ record, onClose, onNavigateStation }) {
             }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#4B5E57' }}>Total Dissolved Solids</span>
               <div style={{ marginTop: '4px' }}>
-                {renderParamValue(record.tds, 'mg/L', 'Threshold: 500 mg/L')}
+                {renderParamValue(record.tds, 'mg/L', 'Desirable: 500 | Permissible: 2000')}
               </div>
               <span style={{
                 display: 'inline-block',
                 marginTop: '6px',
                 fontSize: '0.7rem',
                 fontWeight: 600,
-                color: record.tdsFlag ? '#DC2626' : '#16A34A'
+                color: record.tdsFlag ? (record.tds > 2000 ? '#DC2626' : '#D97706') : '#16A34A'
               }}>
-                {record.tdsFlag ? '● Flagged: > 500 mg/L' : '● Within threshold'}
+                {record.tdsFlag
+                  ? (record.tds > 2000 ? '● Flagged: Exceeds permissible limit (>2,000 mg/L)' : '● Flagged: Exceeds desirable threshold (>500 mg/L)')
+                  : '● Within desirable threshold (<= 500 mg/L)'}
               </span>
             </div>
           </div>

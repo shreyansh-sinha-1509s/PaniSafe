@@ -1,208 +1,253 @@
-# Pani Safe — Professional Groundwater Quality Monitoring & Risk Screening Platform
+# Pani Safe — Groundwater Quality Screening & Decision-Support Platform
 
-[![IBM Z Datathon 2026](https://img.shields.io/badge/IBM%20Z-Datathon%202026-052F5F?style=for-the-badge&logo=ibm)](https://www.ibm.com/community/z/)
-[![LinuxONE Architecture](https://img.shields.io/badge/Architecture-s390x%20%7C%20x86__64-0D9488?style=for-the-badge)](https://www.ibm.com/it-infrastructure/linuxone)
+[![IBM Z Datathon 2026](https://img.shields.io/badge/IBM%20Z%20Datathon-2026%20(Event%20Code:%20SSF2026)-052F5F?style=for-the-badge&logo=ibm)](https://www.ibm.com/community/z/)
+[![LinuxONE Architecture](https://img.shields.io/badge/Architecture-s390x%20%7C%20x86__64%20%7C%20arm64-0D9488?style=for-the-badge)](https://www.ibm.com/it-infrastructure/linuxone)
 [![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-164E3F?style=for-the-badge&logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/Frontend-React%20%7C%20Vite-0F382A?style=for-the-badge&logo=react)](https://react.dev/)
-[![Status](https://img.shields.io/badge/Build-Passing%20v1.0.0-10B981?style=for-the-badge)]()
+[![Tests](https://img.shields.io/badge/Tests-19%20Passed%20%7C%200%20Failed-10B981?style=for-the-badge)]()
+[![Data Provenance](https://img.shields.io/badge/Data%20Provenance-Deterministic%20Synthetic%20Demo-F59E0B?style=for-the-badge)]()
 
-> **Pani Safe** is an environmental analytics and decision-support platform designed for **Maharashtra, India**, developed for the **IBM Z Datathon 2026**. By analyzing historical groundwater chemistry archives from the **Central Ground Water Board (CGWB)**, it enables researchers, planners, and public health officials to identify records crossing screening thresholds, pinpoint data gaps, and prioritize monitoring stations for field laboratory verification.
-
----
-
-## 🌟 Key Capabilities & Highlights
-
-- **Real Data Integration:** Ingests and processes **18,249 historical sample records**, across **1,804 unique stations** and **36 districts** in Maharashtra.
-- **Scientific Decision-Support Screening:** Flags readings exceeding benchmark guidelines (pH outside 6.5–8.5, TDS &gt; 500 mg/L) without alarmist language.
-- **Data Quality & Null-Preservation:** Preserves missing measurements as `null` rather than converting them to zero. Excludes physically impossible 0 mg/L TDS readings from statistics as unverified.
-- **Station Disambiguation:** Resolves identical village names across different talukas using composite keys (`District + Station + Lat + Lon`).
-- **Interactive Analytics Dashboard:** Features KPI cards, binned pH and TDS histograms, top districts by screening need, historical sampling trends over time, and multi-faceted filtering.
-- **Open Geographic GIS Mapping:** Leaflet-powered interactive map utilizing free OpenStreetMap tiles, with custom status pins and station popups.
-- **Data Explorer & CSV Export:** Searchable, sortable, and paginated table with slide-over parameter inspection drawers and direct CSV downloads.
-- **Validated Feedback System:** Captures researcher inquiries directly into a local persistent audit trail without third-party email trackers.
-- **IBM LinuxONE (s390x) Compatibility:** 100% pure-JavaScript backend dependencies (`bcryptjs`, Node.js native crypto, in-memory index) to ensure zero compilation errors on s390x Ubuntu.
+> **Pani Safe** is an environmental analytics and decision-support prototype designed for **Maharashtra, India**, developed for the **IBM Z Datathon 2026 (Event Code: SSF2026)**. By evaluating hydrochemical parameters against **Bureau of Indian Standards (BIS IS 10500:2012)** drinking water screening thresholds, Pani Safe assists environmental researchers, hydrologists, and public health planners in identifying monitoring stations that require qualified human review and accredited laboratory verification.
 
 ---
 
-## 🏗️ Project Architecture
+## 🔬 Critical Data Provenance & Scientific Notice
+
+### 1. Data Provenance: Synthetic Demonstration Dataset (Option B)
+To ensure complete scientific integrity and transparency:
+- The **18,249 sample records** in this repository represent a **reproducible synthetic demonstration dataset** generated using a fixed-seed PRNG (Mulberry32, seed `20260427`).
+- The dataset models realistic Maharashtra groundwater hydrochemistry across all **36 administrative districts** and **1,804 unique monitoring stations**, reflecting seasonal pre-monsoon and post-monsoon distributions and regional mineral characteristics.
+- **Why Synthetic Data?** Publicly accessible Central Ground Water Board (CGWB) micro-level datasets lacked verifiable open licensing and traceable coordinate-level provenance within the datathon workspace. Rather than misrepresenting synthetic records as raw physical CGWB sensor data, all records are explicitly tagged as `SYNTHETIC_DEMO` across the database, API telemetry, user interface, Leaflet maps, and CSV exports.
+
+### 2. Screening Decision Support vs. Drinking Water Certification
+- **Screening Flag ≠ Confirmed Contamination:** A screening flag indicates that a sample value exceeds an initial benchmark threshold. It is **not** proof of toxicity or contamination.
+- **Decision Support:** Flags serve as prioritization signals for district hydrologists to deploy field teams for duplicate sampling and chain-of-custody laboratory testing.
+- **Accredited Verification Required:** Definitive water safety assessments require physical testing in an accredited NABL facility, including biological pathogens (total coliform / E. coli) and heavy metals (arsenic, lead, mercury).
+
+---
+
+## 📊 Recalculated Dataset Metrics
+
+All metrics reflect exact figures from the reproducible dataset (`seed: 20260427`):
+
+| Metric | Exact Count / Measurement | Methodological Context |
+| :--- | :--- | :--- |
+| **Total Sample Events** | **18,249** | Multi-year seasonal screening events |
+| **Unique Monitoring Stations** | **1,804** | Indexed via composite keys to resolve duplicate village names |
+| **Districts Covered** | **36** | Complete administrative coverage of Maharashtra |
+| **Review Signals (`needsReviewCount`)** | **2,865 (15.7%)** | Total records crossing at least one screening benchmark |
+| **pH Benchmark Exceedances** | **1,122 (6.4%)** | Samples with valid pH outside acceptable range 6.5–8.5 |
+| **TDS Desirable Benchmark Exceedances** | **2,223 (13.0%)** | Samples with valid TDS &gt; 500 mg/L (desirable palatability limit) |
+| **Dual-Exceedance Signals** | **480 (2.6%)** | Samples exceeding both pH and TDS thresholds simultaneously |
+| **Within Screening Limits** | **15,384 (84.3%)** | Samples meeting initial screening criteria |
+| **Valid pH Readings** | **17,569 (96.3%)** | 680 missing values (3.7%) preserved as `null` |
+| **Usable TDS Readings** | **17,113 (93.8%)** | 1,136 missing/unverified values (6.2%), including `0 mg/L` sensor defaults |
+| **Data Quality Index** | **95.0%** | Overall parameter completeness across reported fields |
+
+---
+
+## 🏛️ Standards Alignment: BIS IS 10500:2012
+
+Pani Safe references the **Bureau of Indian Standards (BIS IS 10500:2012 Drinking Water Specification)**:
+
+| Parameter | Acceptable / Desirable Limit | Permissible Limit in Absence of Alternate Source | Screening Action in Pani Safe |
+| :--- | :--- | :--- | :--- |
+| **pH Value** | **6.5 – 8.5** | **No relaxation** | Flagged when `< 6.5` (corrosion risk) or `> 8.5` (encrustation risk). Values outside `0–14` are excluded as sensor errors. |
+| **Total Dissolved Solids (TDS)** | **500 mg/L** | **2,000 mg/L** | Flagged as "Review Recommended" above 500 mg/L. Natural water always contains dissolved minerals; readings of `0.0 mg/L` are treated as unverified sensor defaults. |
+
+---
+
+## 🏗️ System Architecture
 
 ```
 PaniSafe/
   ├── backend/
   │   ├── data/
-  │   │   ├── pani_safe_results.csv    <-- 18,249 historical records
-  │   │   ├── pani_safe_alerts.csv     <-- 2,831 flagged review records
-  │   │   ├── feedback.json            <-- Persistent researcher notes
-  │   │   └── users.json               <-- Hashed user accounts & demo analyst
+  │   │   ├── pani_safe_results.csv    <-- 18,249 synthetic demo records (seed 20260427)
+  │   │   ├── pani_safe_alerts.csv     <-- 2,865 review queue records
+  │   │   ├── feedback.json            <-- Persistent local researcher feedback audit trail
+  │   │   └── users.json               <-- Demo analyst account (bcrypt hashed)
   │   ├── src/
-  │   │   ├── controllers/             <-- REST endpoints & auth
+  │   │   ├── controllers/             <-- API controllers & JWT auth
   │   │   ├── routes/                  <-- Express route definitions
-  │   │   ├── services/dataService.js  <-- In-memory indexed query engine
-  │   │   ├── utils/generateData.js    <-- CGWB Maharashtra dataset synthesizer
-  │   │   └── server.js                <-- Express server (API & static build)
+  │   │   ├── services/dataService.js  <-- In-memory multi-indexed query engine (sub-5ms)
+  │   │   ├── utils/generateData.js    <-- Deterministic seeded data synthesizer
+  │   │   └── server.js                <-- Express server (API & static client delivery)
+  │   ├── test/
+  │   │   └── verify.js                <-- 19 automated integration tests
   │   └── package.json
   ├── frontend/
   │   ├── src/
-  │   │   ├── components/              <-- Navbar, Footer, Logo, Map, Drawer, Cards
-  │   │   ├── context/AuthContext.jsx  <-- Session & demo login state
-  │   │   ├── pages/                   <-- Home, Dashboard, Explore, Map, Alerts, etc.
-  │   │   ├── services/api.js          <-- Fetch API client
+  │   │   ├── components/              <-- Navbar, Footer, LeafletMap, RecordDrawer, MetricCard
+  │   │   ├── context/AuthContext.jsx  <-- Analyst session state & demo login
+  │   │   ├── pages/                   <-- Home, Dashboard, Explore, Map, Alerts, Methodology, About, Contact
+  │   │   ├── services/api.js          <-- Configurable REST API client
   │   │   ├── styles/index.css         <-- Custom CSS design system tokens
-  │   │   ├── App.jsx                  <-- Client-side router
+  │   │   ├── App.jsx                  <-- Client router
   │   │   └── main.jsx
-  │   ├── index.html                   <-- SEO metadata & fonts
+  │   ├── index.html                   <-- SEO metadata & OpenGraph tags
   │   ├── package.json
-  │   └── vite.config.js               <-- Proxy configuration (port 3000 -> 5000)
+  │   └── vite.config.js               <-- Build configuration with isolated PostCSS
   ├── docs/
-  │   ├── architecture.md              <-- Technical design & component hierarchy
-  │   ├── data-methodology.md          <-- Null handling, IS 10500 standards
-  │   └── linuxone-deployment.md       <-- IBM LinuxONE Community Cloud guide
-  ├── .gitignore
-  ├── package.json                     <-- Root scripts
+  │   ├── architecture.md              <-- Technical architecture specification
+  │   ├── data-methodology.md          <-- Data cleaning rules, null handling & IS 10500
+  │   ├── linuxone-deployment.md       <-- IBM LinuxONE Community Cloud (s390x) guide
+  │   └── demo-script.md               <-- 3-minute video/judging presentation script
+  ├── package.json                     <-- Root workspace scripts
   └── README.md
 ```
 
 ---
 
-## ⚡ Quick Start: Running on Windows
+## 🌟 Key Features
 
-### 1. Prerequisites
-- **Node.js**: v18.x, v20.x, v22.x, or v24.x ([Download Node.js](https://nodejs.org/))
-- **npm**: v9.x or higher
-
-### 2. Installation
-Open PowerShell in the `PaniSafe` workspace directory:
-
-```powershell
-# 1. Install backend dependencies
-cd backend
-npm install
-
-# 2. Ingest or generate the CGWB Maharashtra historical dataset
-npm run generate-data
-# (If you have files from JupyterLab, place them in backend/data/pani_safe_results.csv)
-
-# 3. Install frontend dependencies and build production client
-cd ..\frontend
-npm install
-npm run build
-cd ..
-```
-
-### 3. Launching the Platform
-
-**Option A: Single Unified Server (Production Mode)**
-```powershell
-cd backend
-npm start
-```
-Visit: **`http://localhost:5000`** (Serves both REST API and React UI).
-
-**Option B: Development Mode (with Live HMR)**
-Open two terminal windows:
-```powershell
-# Terminal 1: Backend API
-cd backend
-npm run dev
-
-# Terminal 2: Frontend Client
-cd frontend
-npm run dev
-```
-Visit: **`http://localhost:3000`** (Proxies API calls to port 5000).
+1. **Deterministic Reproducibility:** Data generation is 100% reproducible via Mulberry32 PRNG (`npm run generate-data`).
+2. **Null-Preserving Data Engine:** Blank readings remain `null`; never coerced to zero. Data completeness is explicitly measured.
+3. **Station Disambiguation:** Resolves identical village names across different talukas using composite keys: `${District}_${StationName}_${Latitude}_${Longitude}`.
+4. **Interactive Dashboard:** Binned pH and TDS histograms, seasonal sampling timeline, top districts by screening need, and dynamic multi-criteria filtering.
+5. **GIS Spatial Map:** Leaflet + OpenStreetMap engine rendering color-coded station pins and contextual inspection popups.
+6. **Data Explorer & CSV Export:** Searchable, sortable, paginated table with slide-over parameter drawer and streaming CSV export with provenance notices.
+7. **IBM LinuxONE (s390x) Portability:** Built exclusively with pure-JavaScript dependencies (`bcryptjs`, native crypto, in-memory index) to ensure zero compilation or gyp errors on s390x enterprise Linux.
+8. **Secure Local Persistence:** Feedback and throwaway demo accounts are persisted locally in audit files without transmitting sensitive data to external trackers.
 
 ---
 
-## 🐧 Quick Start: Running on IBM LinuxONE (s390x Ubuntu)
+## ⚡ Quick Start: Local Development (Windows / macOS / Linux)
 
-Pani Safe runs natively on **IBM LinuxONE Community Cloud** running Ubuntu on the **s390x** architecture.
+### 1. Prerequisites
+- **Node.js**: v18.x, v20.x, v22.x, or v24.x
+- **npm**: v9.x or higher
 
+### 2. Install & Build
 ```bash
-# 1. SSH into LinuxONE Community Cloud instance
-ssh linux1@<your-linuxone-ip>
-
-# 2. Clone repository
-git clone https://github.com/<your-username>/PaniSafe.git
+# Clone the repository
+git clone https://github.com/shreyansh-sinha-1509s/PaniSafe.git
 cd PaniSafe
 
-# 3. Install and build
+# Install dependencies (root, backend, and frontend)
+npm install
+cd backend && npm install && cd ../frontend && npm install && cd ..
+
+# Compile production frontend bundle
+npm run build
+```
+
+### 3. Run Automated Integration Tests
+```bash
+npm test
+```
+*Executes 19 end-to-end tests verifying the data service, API endpoints, IS 10500 metadata, CSV export, feedback validation, and auth.*
+
+### 4. Start the Application
+
+**Option A: Single Unified Production Server (Recommended)**
+```bash
+npm start
+```
+- Serves both REST API and React UI at: **`http://localhost:5000`**
+- Check system telemetry: **`http://localhost:5000/api/health`**
+
+**Option B: Concurrent Development Mode (Live HMR)**
+```bash
+npm run dev
+```
+- Frontend client: **`http://localhost:3000`** (proxies API calls to port 5000)
+- Backend API: **`http://localhost:5000`**
+
+### 5. Demo Analyst Credentials
+To inspect the authenticated analyst view:
+- **Email:** `analyst.demo@panisafe.in`
+- **Password:** `DemoAnalyst2026!`
+*(Throwaway demo account; password hashed with bcrypt)*
+
+---
+
+## 🐧 IBM LinuxONE Community Cloud Deployment (s390x)
+
+Pani Safe is designed to deploy natively on **IBM LinuxONE Community Cloud** running Ubuntu on the **s390x** mainframe architecture.
+
+### Step 1: Connect to LinuxONE Instance via SSH Tunnel
+To keep the application bound securely to loopback on the VM while allowing evaluation from your local browser, establish an SSH tunnel:
+
+```bash
+# Replace with your LinuxONE VM username and IP address:
+ssh -L 5000:localhost:5000 -i <path-to-private-key> linux1@<LINUXONE_VM_IP>
+```
+
+### Step 2: Verify Architecture
+```bash
+uname -m
+# Output MUST report: s390x
+```
+
+### Step 3: Clone, Build & Run
+```bash
+git clone https://github.com/shreyansh-sinha-1509s/PaniSafe.git
+cd PaniSafe
+npm install
 cd backend && npm install && cd ../frontend && npm install && npm run build && cd ..
 
-# 4. Start production engine
+# Start the unified server bound to loopback:
 cd backend
 PORT=5000 NODE_ENV=production npm start
 ```
 
-Access at `http://<your-linuxone-ip>:5000/`.  
-Check system telemetry and architecture detection:
+### Step 4: Verify Telemetry on LinuxONE
+In a second terminal on the VM (or via the SSH tunnel locally):
 ```bash
 curl http://localhost:5000/api/health
 ```
 
-For complete systemd auto-restart and Docker s390x instructions, consult [docs/linuxone-deployment.md](docs/linuxone-deployment.md).
-
----
-
-## 📊 Data Integration & Placement Instructions
-
-The data engine reads from `backend/data/`:
-1. `backend/data/pani_safe_results.csv` — Full cleaned historical chemistry records.
-2. `backend/data/pani_safe_alerts.csv` — Subset of flagged records requiring review.
-
-If you export fresh results from JupyterLab:
-```bash
-# Copy your exported CSV files directly into backend/data:
-cp /path/to/exported/pani_safe_results.csv backend/data/pani_safe_results.csv
-cp /path/to/exported/pani_safe_alerts.csv backend/data/pani_safe_alerts.csv
+Expected JSON response confirming LinuxONE execution:
+```json
+{
+  "status": "healthy",
+  "eventCode": "SSF2026",
+  "system": {
+    "platform": "linux",
+    "architecture": "s390x",
+    "nodeVersion": "v20.x.x"
+  },
+  "dataEngine": {
+    "isLoaded": true,
+    "totalRecordsLoaded": 18249,
+    "stationsIndexed": 1804,
+    "districtsCovered": 36,
+    "isSyntheticData": true
+  }
+}
 ```
-On startup, the backend validates headers, checks row counts, parses dates, validates coordinates, and caches multi-dimensional indices in memory.
+
+View the platform at `http://localhost:5000` through your local browser via the SSH tunnel.
 
 ---
 
-## 🔬 Scientific Screening Methodology
+## 📋 Automated Test Coverage
 
-Pani Safe adheres strictly to objective scientific terminology:
-
-| Parameter | Screening Benchmark | Official Context (BIS IS 10500:2012) |
-| :--- | :--- | :--- |
-| **pH** | `< 6.5` or `> 8.5` | Standard acceptable drinking water range (corrosion vs. encrustation) |
-| **TDS** | `> 500 mg/L` | Desirable palatability threshold (permissible up to 2,000 mg/L if no alternate source) |
-| **0 TDS** | Treat as unverified | Natural groundwater always contains dissolved minerals; 0 is an instrument/entry error |
-| **Invalid pH** | `< 0` or `> 14` | Excluded from pH distributions as calibration errors |
-
----
-
-## 🛡️ Important Scientific & Decision-Support Disclaimer
-
-> **Scientific Notice:** Pani Safe is an analytical screening and decision-support prototype developed for the **IBM Z Datathon 2026**. A screening flag indicates that a historical measurement crosses preliminary benchmark thresholds, **not a confirmed contamination finding or drinking-water certification**. Water must never be deemed definitively safe or unsafe based solely on historical or screening data without fresh physical sampling and accredited NABL laboratory verification.
-
----
-
-## 📦 How to Publish this Repository to GitHub
-
-```bash
-# 1. Initialize git if not already present
-git init
-
-# 2. Add files (.gitignore ensures node_modules and temp files are excluded)
-git add .
-
-# 3. Commit initial release
-git commit -m "feat: complete Pani Safe platform for IBM Z Datathon 2026"
-
-# 4. Set main branch and remote
-git branch -M main
-git remote add origin https://github.com/<your-username>/PaniSafe.git
-
-# 5. Push to GitHub
-git push -u origin main
-```
+The test suite in [`backend/test/verify.js`](file:///c:/Users/essak/Downloads/PaniSafe-main/backend/test/verify.js) validates:
+1. Deterministic metric calculation (18,249 records, 1,804 stations, 36 districts, 2,865 alerts)
+2. HTTP server initialization on ephemeral test ports
+3. Telemetry response including event code `SSF2026` and `isSyntheticData: true`
+4. Statistical summary and histogram binning
+5. Multi-faceted query filtering, search, and pagination
+6. Single record retrieval by identifier
+7. District-level aggregations
+8. Station GIS indexing and coordinate boundary validation
+9. Station chronological timeline and history
+10. Alert queue sorting and priority categorization
+11. Multi-year sampling trend aggregations
+12. BIS IS 10500:2012 metadata endpoint alignment
+13. CSV export streaming with synthetic provenance disclaimer headers
+14. Feedback form input sanitization and persistence
+15. Feedback email format validation
+16. Demo analyst authentication and JWT generation
+17. Static frontend bundle serving from Express root
 
 ---
 
 ## 👥 Authors & Acknowledgments
 
-- **Developed for:** IBM Z Datathon 2026
-- **Data Source:** Central Ground Water Board (CGWB), Ministry of Jal Shakti, Government of India
+- **Developed for:** IBM Z Datathon 2026 (Event Code: **SSF2026**)
 - **Target Platform:** IBM LinuxONE Community Cloud (Ubuntu on s390x)
+- **Standard Reference:** Bureau of Indian Standards (BIS IS 10500:2012 Drinking Water Specification)
 - **License:** Apache License 2.0

@@ -2,13 +2,10 @@ import React from 'react';
 import AlertNotice from '../components/AlertNotice';
 import {
   FileText,
-  CheckCircle,
-  AlertTriangle,
   Scale,
   Microscope,
   Database,
   Layers,
-  HelpCircle,
   ShieldCheck
 } from 'lucide-react';
 
@@ -37,18 +34,20 @@ export default function MethodologyPage() {
         <div className="card" style={{ marginBottom: '28px' }}>
           <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0F382A', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Database size={20} color="#0D9488" />
-            <span>1. Dataset Source & Coverage</span>
+            <span>1. Dataset Provenance & Scope</span>
           </h2>
           <p style={{ fontSize: '0.925rem', color: '#4B5E57', lineHeight: 1.7, marginBottom: '12px' }}>
-            The primary dataset is derived from the groundwater monitoring archives maintained by the <strong>Central Ground Water Board (CGWB)</strong>, Ministry of Jal Shakti, Government of India. The records comprise periodic hydrochemical sampling from dug wells and observation piezometers situated across <strong>35 administrative districts in Maharashtra</strong>.
+            The primary dataset is a deterministic synthetic demonstration dataset modeled on Maharashtra regional hydrogeological characteristics and Bureau of Indian Standards (BIS IS 10500:2012) drinking water benchmarks. Generated with a reproducible fixed seed (<code>20260427</code>) for the <strong>IBM Z Datathon 2026 (Event Code: SSF2026)</strong>, it enables consistent statewide decision-support evaluation without representing live physical wellhead certifications.
           </p>
           <div style={{ background: '#F8FAF9', padding: '16px', borderRadius: '8px', border: '1px solid #DDE5E1', fontSize: '0.875rem' }}>
-            <div style={{ fontWeight: 600, color: '#0F382A', marginBottom: '8px' }}>Dataset Key Figures:</div>
+            <div style={{ fontWeight: 600, color: '#0F382A', marginBottom: '8px' }}>Dataset Key Figures (Recalculated from Source Files):</div>
             <ul style={{ paddingLeft: '20px', color: '#4B5E57', lineHeight: 1.6 }}>
               <li>Total Analyzed Records: <strong>18,249 sample events</strong></li>
-              <li>Disambiguated Monitoring Stations: <strong>1,758+ observation stations</strong></li>
-              <li>Statewide Geographic Scope: <strong>Maharashtra (Western, Vidarbha, Marathwada, Khandesh, and Konkan regions)</strong></li>
-              <li>Primary Temporal Cadence: <strong>Historical periodic sampling (typically pre-monsoon and post-monsoon rounds)</strong></li>
+              <li>Disambiguated Monitoring Stations: <strong>1,804 observation stations</strong></li>
+              <li>Statewide Geographic Scope: <strong>36 administrative districts across Maharashtra</strong></li>
+              <li>Records Exceeding Screening Benchmarks: <strong>2,865 records (15.7%)</strong></li>
+              <li>Parameter Measurement Completeness (Quality Index): <strong>95.0%</strong></li>
+              <li>Data Provenance: <strong>Synthetic Benchmark (Deterministic Seed 20260427)</strong></li>
             </ul>
           </div>
         </div>

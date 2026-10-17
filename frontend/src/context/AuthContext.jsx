@@ -8,6 +8,12 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('panisafe_auth_token'));
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('panisafe_auth_token');
+    setToken(null);
+    setUser(null);
+  };
+
   useEffect(() => {
     async function loadUser() {
       if (token) {
@@ -49,12 +55,6 @@ export function AuthProvider({ children }) {
 
   const demoLogin = async () => {
     return login('analyst.demo@panisafe.in', 'Datathon2026!');
-  };
-
-  const logout = () => {
-    localStorage.removeItem('panisafe_auth_token');
-    setToken(null);
-    setUser(null);
   };
 
   return (

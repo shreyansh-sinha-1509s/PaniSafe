@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { submitFeedback } from '../services/api';
 import AlertNotice from '../components/AlertNotice';
-import { Mail, Send, CheckCircle2, AlertCircle, MessageSquare } from 'lucide-react';
+import { Mail, Send, CheckCircle2 } from 'lucide-react';
 
 export default function ContactPage() {
   const [form, setForm] = useState({

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AlertNotice from '../components/AlertNotice';
 import Logo from '../components/Logo';
-import { UserPlus, Mail, Key, User, Building, ArrowRight } from 'lucide-react';
+import { Mail, Key, User, Building } from 'lucide-react';
 
 export default function RegisterPage({ navigate }) {
   const { register } = useAuth();

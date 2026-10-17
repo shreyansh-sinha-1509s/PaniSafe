@@ -267,14 +267,18 @@ class DataService {
   computeScreeningReason(phFlag, tdsFlag, ph, tds) {
     const reasons = [];
     if (phFlag && ph !== null) {
-      if (ph < 6.5) reasons.push(`pH ${ph.toFixed(2)} is below acceptable screening range (6.5 - 8.5)`);
-      if (ph > 8.5) reasons.push(`pH ${ph.toFixed(2)} exceeds acceptable screening range (6.5 - 8.5)`);
+      if (ph < 6.5) reasons.push(`pH ${ph.toFixed(2)} is below acceptable limit (6.5 - 8.5 per IS 10500:2012) — review recommended for acidic corrosion tendency`);
+      if (ph > 8.5) reasons.push(`pH ${ph.toFixed(2)} exceeds acceptable limit (6.5 - 8.5 per IS 10500:2012) — review recommended for alkaline encrustation`);
     }
     if (tdsFlag && tds !== null) {
-      reasons.push(`TDS ${tds.toFixed(1)} mg/L exceeds screening threshold (500 mg/L)`);
+      if (tds > 2000) {
+        reasons.push(`TDS ${tds.toFixed(1)} mg/L exceeds permissible limit (2,000 mg/L per IS 10500:2012) — priority review signal`);
+      } else {
+        reasons.push(`TDS ${tds.toFixed(1)} mg/L exceeds desirable screening threshold (500 mg/L), within permissible limit (2,000 mg/L in absence of alternate source) per IS 10500:2012`);
+      }
     }
     if (reasons.length === 0) {
-      return 'Within preliminary screening limits';
+      return 'Within preliminary screening limits (pH 6.5 - 8.5, TDS <= 500 mg/L)';
     }
     return reasons.join('; ');
   }
@@ -284,16 +288,15 @@ class DataService {
     try {
       console.log('Initializing Pani Safe Data Engine...');
       let resultsFileExists = fs.existsSync(RESULTS_PATH);
-      let alertsFileExists = fs.existsSync(ALERTS_PATH);
 
       if (!resultsFileExists) {
         console.warn(`[DATA NOTICE] File not found at ${RESULTS_PATH}.`);
-        console.warn(`Generating full CGWB Maharashtra benchmark dataset (~18,249 records)...`);
+        console.warn(`Generating reproducible synthetic demonstration dataset (18,249 records)...`);
         generateCGWBMaharashtraData(18249);
         this.isSimulatedBenchmark = true;
       } else {
         console.log(`[DATA OK] Found existing results CSV at ${RESULTS_PATH}`);
-        this.isSimulatedBenchmark = false;
+        this.isSimulatedBenchmark = true;
       }
 
       // Parse results file
@@ -315,17 +318,16 @@ class DataService {
       console.log(`- Usable TDS readings: ${this.summary.validTdsCount}`);
 
       this.metadata = {
-        source: 'Central Ground Water Board (CGWB) Maharashtra Groundwater Quality Archive',
-        benchmarkMode: this.isSimulatedBenchmark,
-        dataSourceDescription: this.isSimulatedBenchmark
-          ? 'CGWB Maharashtra 18,249-record benchmark dataset (synthesized from official CGWB district profiles & screening thresholds)'
-          : 'User supplied JupyterLab export (pani_safe_results.csv)',
+        source: 'Synthetic Demonstration Dataset (Modeled on Maharashtra Regional Hydrochemistry & BIS IS 10500:2012 Standards)',
+        isSynthetic: true,
+        benchmarkMode: true,
+        dataSourceDescription: 'Deterministic synthetic demonstration dataset (18,249 records across 36 districts) generated with seed 20260427 for IBM Z Datathon 2026 prototype evaluation. Not real Central Ground Water Board (CGWB) field measurements or live physical water test certifications.',
         totalRecords: this.records.length,
         totalStations: this.stations.size,
         totalDistricts: this.districts.size,
         screeningRules: {
-          phRange: '6.5 - 8.5 (Values <0 or >14 excluded as instrument errors)',
-          tdsThreshold: '> 500 mg/L (Readings of 0 treated as unverified/missing)',
+          phStandard: 'Acceptable limit: 6.5 - 8.5 | Permissible limit: No relaxation (BIS IS 10500:2012). Values outside 0-14 excluded as instrument anomalies.',
+          tdsStandard: 'Desirable threshold: 500 mg/L | Permissible limit in absence of alternate source: 2,000 mg/L (BIS IS 10500:2012). Zero TDS treated as unverified/sensor default.',
           disclaimer: 'Preliminary screening and decision-support tool. Not a drinking-water safety certification.'
         },
         columnsDetected: headers
@@ -774,10 +776,15 @@ class DataService {
       'pH_Flag',
       'TDS_Flag',
       'Needs_Review',
-      'Screening_Reason'
+      'Screening_Reason',
+      'Data_Provenance'
     ];
 
-    const lines = [headers.join(',')];
+    const lines = [
+      '# Pani Safe - IBM Z Datathon 2026 (SSF2026) - Synthetic Demonstration Dataset',
+      '# Notice: Simulated hydrochemical benchmark records for decision-support screening demonstration. Not certified drinking water test results.',
+      headers.join(',')
+    ];
     for (const r of records) {
       const line = [
         `"${r.station}"`,
@@ -795,7 +802,8 @@ class DataService {
         r.phFlag ? 'TRUE' : 'FALSE',
         r.tdsFlag ? 'TRUE' : 'FALSE',
         r.needsReview ? 'TRUE' : 'FALSE',
-        `"${r.screeningReason.replace(/"/g, '""')}"`
+        `"${r.screeningReason.replace(/"/g, '""')}"`,
+        '"SYNTHETIC_DEMO"'
       ];
       lines.push(line.join(','));
     }

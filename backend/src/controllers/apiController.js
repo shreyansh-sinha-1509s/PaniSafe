@@ -16,6 +16,8 @@ if (!fs.existsSync(FEEDBACK_FILE)) {
 export const getHealth = (req, res) => {
   res.json({
     status: 'healthy',
+    eventCode: 'SSF2026',
+    platform: 'Pani Safe Groundwater Quality Risk Screening Platform',
     timestamp: new Date().toISOString(),
     system: {
       platform: os.platform(),
@@ -27,6 +29,7 @@ export const getHealth = (req, res) => {
     dataEngine: {
       isLoaded: dataService.isLoaded,
       loadError: dataService.loadError,
+      isSyntheticData: true,
       benchmarkMode: dataService.isSimulatedBenchmark,
       totalRecordsLoaded: dataService.records.length,
       stationsIndexed: dataService.stations.size,
@@ -188,13 +191,30 @@ export const submitFeedback = (req, res) => {
       });
     }
 
+    // Length limits
+    if (typeof name !== 'string' || name.trim().length > 100) {
+      return res.status(400).json({ error: 'Validation failed', details: 'Name must be 100 characters or fewer.' });
+    }
+    if (typeof email !== 'string' || email.trim().length > 120) {
+      return res.status(400).json({ error: 'Validation failed', details: 'Email must be 120 characters or fewer.' });
+    }
+    if (subject && (typeof subject !== 'string' || subject.trim().length > 150)) {
+      return res.status(400).json({ error: 'Validation failed', details: 'Subject must be 150 characters or fewer.' });
+    }
+    if (typeof message !== 'string' || message.trim().length > 3000) {
+      return res.status(400).json({ error: 'Validation failed', details: 'Message must be 3,000 characters or fewer.' });
+    }
+
+    // Basic sanitization: strip angle brackets to prevent stored script injection
+    const sanitize = (str) => String(str).replace(/[<>]/g, '').trim();
+
     const feedbackEntry = {
       id: `FB-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      name: name.trim(),
+      name: sanitize(name),
       email: email.trim().toLowerCase(),
-      subject: (subject || 'General Inquiry').trim(),
-      category: category || 'General',
-      message: message.trim(),
+      subject: sanitize(subject || 'General Inquiry'),
+      category: sanitize(category || 'General'),
+      message: sanitize(message),
       submittedAt: new Date().toISOString(),
       status: 'Received',
       storedLocally: true

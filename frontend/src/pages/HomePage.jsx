@@ -1,36 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { fetchSummary, fetchDistricts } from '../services/api';
-import MetricCard from '../components/MetricCard';
+import { fetchSummary } from '../services/api';
 import AlertNotice from '../components/AlertNotice';
 import {
   ArrowRight,
-  Database,
   ShieldAlert,
   MapPin,
   FileCheck,
   Search,
-  Activity,
-  Layers,
-  ChevronRight,
   Droplets,
-  CheckCircle,
-  HelpCircle
+  CheckCircle
 } from 'lucide-react';
 
 export default function HomePage({ navigate }) {
   const [summaryData, setSummaryData] = useState(null);
-  const [districts, setDistricts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [sumRes, distRes] = await Promise.all([
-          fetchSummary(),
-          fetchDistricts()
-        ]);
+        const sumRes = await fetchSummary();
         if (sumRes.success) setSummaryData(sumRes.data.summary);
-        if (distRes.success) setDistricts(distRes.data.slice(0, 6));
       } catch (err) {
         console.error('Failed to load home page data:', err);
       } finally {
@@ -95,7 +84,7 @@ export default function HomePage({ navigate }) {
                 marginBottom: '32px',
                 maxWidth: '540px'
               }}>
-                Pani Safe is an analytical decision-support platform for Maharashtra, India. By screening historical Central Ground Water Board (CGWB) records against preliminary water-quality benchmarks, we help researchers, planners, and district analysts pinpoint data gaps and locate stations requiring further laboratory investigation.
+                Pani Safe is an analytical decision-support prototype for Maharashtra, India. By screening a deterministic synthetic benchmark dataset modeled on Maharashtra regional hydrochemistry against BIS IS 10500:2012 water-quality benchmarks, we help researchers, planners, and district analysts pinpoint data gaps and prioritize stations requiring certified laboratory verification.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '28px' }}>
@@ -118,7 +107,7 @@ export default function HomePage({ navigate }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '0.85rem', color: '#64748B' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <CheckCircle size={15} color="#0D9488" />
-                  <span>Real CGWB Data Pipeline</span>
+                  <span>Synthetic Benchmark Pipeline (SSF2026)</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <CheckCircle size={15} color="#0D9488" />
@@ -150,10 +139,10 @@ export default function HomePage({ navigate }) {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5EEAD4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Real Dataset Metrics
+                  Synthetic Benchmark Metrics
                 </span>
                 <span style={{ background: '#164E3F', color: '#CCFBF1', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '4px' }}>
-                  CGWB Maharashtra
+                  Maharashtra Model (Seed 20260427)
                 </span>
               </div>
 
@@ -180,7 +169,7 @@ export default function HomePage({ navigate }) {
                 <div style={{ background: '#134635', padding: '16px', borderRadius: '10px' }}>
                   <div style={{ fontSize: '0.8rem', color: '#FDE68A' }}>Review Recommended</div>
                   <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FCD34D', marginTop: '4px' }}>
-                    {loading ? '...' : summaryData ? `${summaryData.overallReviewRate}%` : '15.5%'}
+                    {loading ? '...' : summaryData ? `${summaryData.overallReviewRate}%` : '15.7%'}
                   </div>
                 </div>
               </div>
@@ -300,12 +289,12 @@ export default function HomePage({ navigate }) {
             gap: '16px'
           }}>
             {[
-              { step: '01', title: 'Data Ingestion', desc: 'Raw CGWB groundwater chemistry records imported and parsed.' },
+              { step: '01', title: 'Dataset Ingestion', desc: 'Synthetic benchmark groundwater hydrochemistry dataset modeled on Maharashtra regional characteristics.' },
               { step: '02', title: 'Data Validation', desc: 'Preserves nulls, excludes pH outside 0-14, verifies coordinates.' },
               { step: '03', title: 'Screening Engine', desc: 'Applies threshold checks for pH and TDS without double-counting.' },
               { step: '04', title: 'Visualization', desc: 'Maps, trends, histograms, and sortable tables for exploratory analysis.' },
               { step: '05', title: 'Investigation', desc: 'Identifies high-priority stations for targeted ground sampling.' }
-            ].map((p, idx) => (
+            ].map((p) => (
               <div
                 key={p.step}
                 style={{

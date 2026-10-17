@@ -1,6 +1,6 @@
 import React from 'react';
 import Logo from './Logo';
-import { ShieldCheck, Cpu, Database, AlertCircle, ExternalLink } from 'lucide-react';
+import { Cpu, AlertCircle } from 'lucide-react';
 
 export default function Footer({ navigate }) {
   return (
@@ -128,13 +128,13 @@ export default function Footer({ navigate }) {
               color: '#5EEAD4',
               marginBottom: '16px'
             }}>
-              Source Attribution
+              Dataset Attribution
             </h4>
             <p style={{ fontSize: '0.85rem', color: '#CBD5E1', lineHeight: 1.5, marginBottom: '12px' }}>
-              Groundwater chemistry records sourced from the <strong>Central Ground Water Board (CGWB)</strong>, Ministry of Jal Shakti, Government of India.
+              Utilizes a deterministic synthetic demonstration dataset modeled on Maharashtra regional hydrogeology and BIS IS 10500:2012 screening standards.
             </p>
             <p style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
-              Historical coverage: 35+ Districts across Maharashtra state.
+              Coverage: 18,249 simulated records across 36 districts in Maharashtra.
             </p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function Footer({ navigate }) {
           <AlertCircle size={20} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div style={{ fontSize: '0.825rem', color: '#CBD5E1', lineHeight: 1.5 }}>
             <strong style={{ color: '#FCD34D' }}>Scientific & Decision-Support Notice: </strong>
-            Pani Safe is an analytical screening and prioritization tool built for research and exploratory screening. It is not an official drinking-water testing certification. A screening flag indicates that a historical measurement crosses preliminary benchmark thresholds (e.g. pH &lt; 6.5 / &gt; 8.5 or TDS &gt; 500 mg/L), not a confirmed contamination finding or health hazard. Water must never be deemed definitively safe or unsafe based solely on screening data without fresh certified laboratory verification.
+            Pani Safe is an analytical screening and prioritization tool built for research and exploratory screening. It is not an official drinking-water testing certification. A screening flag indicates that a measurement crosses preliminary benchmark thresholds (e.g. pH &lt; 6.5 / &gt; 8.5 or TDS &gt; 500 mg/L), not a confirmed contamination finding or health hazard. Water must never be deemed definitively safe or unsafe based solely on screening data without fresh certified laboratory verification.
           </div>
         </div>
 
@@ -170,7 +170,7 @@ export default function Footer({ navigate }) {
           gap: '12px'
         }}>
           <div>
-            © 2026 Pani Safe Team. Built for IBM Z Datathon 2026.
+            © 2026 Pani Safe Team. Built for IBM Z Datathon 2026 (Event Code: SSF2026).
           </div>
           <div style={{ display: 'flex', gap: '20px' }}>
             <span>Architecture: Node.js + Express + React</span>

@@ -1,10 +1,8 @@
 import React from 'react';
 import AlertNotice from '../components/AlertNotice';
 import {
-  ShieldCheck,
   Cpu,
   Target,
-  Database,
   Globe,
   Award,
   Layers,
@@ -19,17 +17,17 @@ export default function AboutPage({ navigate }) {
         <div className="page-header">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#0D9488', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>
             <Award size={16} />
-            <span>IBM Z Datathon 2026 Initiative</span>
+            <span>IBM Z Datathon 2026 Initiative (Event Code: SSF2026)</span>
           </div>
           <h1 className="page-title">About Pani Safe</h1>
           <p className="page-subtitle">
-            Pani Safe is an open, transparent environmental screening platform designed to translate complex historical hydrogeological records into actionable decision intelligence for Maharashtra, India.
+            Pani Safe is an open, transparent environmental screening platform designed to translate hydrogeological screening benchmarks into actionable decision intelligence for Maharashtra, India.
           </p>
         </div>
 
         {/* Disclaimer */}
-        <AlertNotice type="disclaimer" title="Datathon Prototype Disclaimer">
-          Pani Safe is an independent research prototype created for the <strong>IBM Z Datathon 2026</strong>. It utilizes public data from the Central Ground Water Board (CGWB). This prototype is not an official government agency portal and does not claim official endorsement or certification authority.
+        <AlertNotice type="disclaimer" title="Datathon Prototype & Dataset Notice">
+          Pani Safe is an independent research prototype created for the <strong>IBM Z Datathon 2026 (Event Code: SSF2026)</strong>. It utilizes a deterministic synthetic benchmark dataset modeled on Maharashtra regional hydrochemistry and BIS IS 10500:2012 screening standards. This prototype is not an official government agency portal and does not provide drinking water safety certifications.
         </AlertNotice>
 
         {/* Vision & Problem Statement */}
@@ -42,7 +40,7 @@ export default function AboutPage({ navigate }) {
             Over 80% of rural domestic drinking water and 65% of agricultural irrigation in Maharashtra depends directly upon groundwater. However, groundwater monitoring data often remains locked within dense tabular archives, making it challenging for local stakeholders to identify regional quality trends or notice critical data gaps.
           </p>
           <p style={{ fontSize: '0.925rem', color: '#4B5E57', lineHeight: 1.7 }}>
-            Our vision with <strong>Pani Safe</strong> is to democratize groundwater quality screening. By applying consistent, transparent screening criteria to thousands of historical CGWB monitoring stations, we provide clear indicators of where further testing and targeted interventions are most needed.
+            Our vision with <strong>Pani Safe</strong> is to democratize groundwater quality screening. By applying consistent, transparent screening criteria to thousands of benchmark monitoring stations, we provide clear indicators of where further physical testing and targeted laboratory verification are most needed.
           </p>
         </div>
 

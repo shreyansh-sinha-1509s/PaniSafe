@@ -1,31 +1,38 @@
 # Pani Safe — IBM LinuxONE Community Cloud Deployment Guide
 
+**Event:** IBM Z Datathon 2026 (Event Code: **SSF2026**)  
 **Target Environment:** IBM LinuxONE Community Cloud  
+**Target VM Name:** `PaniSafe2026`  
 **Operating System:** Ubuntu 22.04 LTS / 24.04 LTS on IBM zSystems (s390x architecture)  
-**Runtimes:** Node.js v20+ / v22+ / v24+, npm, Docker (optional containerized deployment)
+**Runtimes:** Node.js v20+ / v22+ / v24+, npm  
 
 ---
 
 ## 1. Architectural Compatibility with s390x
 
-IBM LinuxONE servers operate on the **s390x (Big-Endian 64-bit)** enterprise mainframe architecture. While standard JavaScript scripts execute platform-agnostically on V8, native C/C++ addons (gyp builds) often fail on s390x if architecture-specific binaries are absent.
+IBM LinuxONE servers operate on the **s390x (Big-Endian 64-bit)** enterprise mainframe architecture. While standard JavaScript scripts execute platform-agnostically on V8, native C/C++ addons (gyp builds) often fail on s390x if architecture-specific binaries or cross-compilation toolchains are absent.
 
 Pani Safe was explicitly engineered for 100% native s390x compatibility:
 - **Pure JavaScript dependencies:** `bcryptjs` replaces native `bcrypt`; standard Node.js native crypto is leveraged.
-- **In-memory data indexing:** Zero dependency on native SQLite or binary driver compilations.
+- **In-memory data indexing:** Zero dependency on native SQLite or binary database driver compilations.
 - **Pure JavaScript CSV engine:** High-throughput streaming and file I/O using native Node.js buffers.
+- **No C/C++ addons:** Zero native addon dependencies across `backend/package.json`.
 
 ---
 
-## 2. LinuxONE Environment Verification
+## 2. LinuxONE Environment Verification & SSH Tunneling
 
-Log in to your LinuxONE Community Cloud virtual machine via SSH:
+### Recommended Judging Connection (Secure Loopback Binding)
+To evaluate the application securely without opening public firewall ports, establish an **SSH tunnel** forwarding port 5000:
 
 ```bash
-ssh linux1@<your-linuxone-instance-ip>
+# Connect using the LinuxONE VM username and IP:
+ssh -L 5000:localhost:5000 -i <path-to-private-key> linux1@<LINUXONE_VM_IP>
 ```
+*(If using the designated datathon identity file: `ssh -L 5000:localhost:5000 -i work/linuxone_ed25519 linux1@<LINUXONE_VM_IP>`)*
 
-Verify the mainframe architecture:
+### Verify Architecture on VM
+Once connected to the VM:
 
 ```bash
 uname -m
@@ -33,7 +40,6 @@ uname -m
 ```
 
 Verify Node.js and npm:
-
 ```bash
 node -v
 # Expected: v20.x, v22.x, or v24.x
@@ -43,7 +49,6 @@ npm -v
 ```
 
 If Node.js is not yet installed on your s390x instance:
-
 ```bash
 sudo apt update
 sudo apt install -y nodejs npm git
@@ -51,53 +56,39 @@ sudo apt install -y nodejs npm git
 
 ---
 
-## 3. Cloning and Setting Up Pani Safe
+## 3. Cloning, Building & Running Pani Safe on LinuxONE
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-username>/PaniSafe.git
+# 1. Clone the repository
+git clone https://github.com/shreyansh-sinha-1509s/PaniSafe.git
 cd PaniSafe
 
-# Install backend dependencies
-cd backend
+# 2. Install dependencies
 npm install
+cd backend && npm install && cd ../frontend && npm install && cd ..
 
-# Verify or generate the CGWB Maharashtra historical dataset
-npm run generate-data
-# If you have exported files from JupyterLab, place them in:
-# backend/data/pani_safe_results.csv
-# backend/data/pani_safe_alerts.csv
-
-# Install frontend dependencies and compile production bundle
-cd ../frontend
-npm install
+# 3. Compile production frontend bundle
 npm run build
-cd ..
+
+# 4. Execute automated integration tests
+npm test
+# Expected: 19 passed, 0 failed
 ```
 
 ---
 
 ## 4. Starting the Production Server on LinuxONE
 
-The Express backend automatically serves the compiled React application from `frontend/dist`. A single unified process serves both the REST API and the frontend client!
+The Express backend automatically serves the compiled React application from `frontend/dist`. A single unified process serves both the REST API and the frontend client:
 
 ```bash
-# Option A: Start directly in foreground
+# Start in background via PM2 or foreground:
 cd backend
 PORT=5000 NODE_ENV=production npm start
-
-# Option B: Run in the background using PM2 or nohup
-npm install -g pm2
-pm2 start src/server.js --name "panisafe-linuxone"
-pm2 save
 ```
 
-Access the application in your browser:
-```
-http://<your-linuxone-ip>:5000/
-```
-
-Verify the health endpoint:
+### Verify Telemetry on LinuxONE
+In another terminal session on the VM (or via the SSH tunnel):
 ```bash
 curl http://localhost:5000/api/health
 ```
@@ -106,19 +97,31 @@ Expected JSON response:
 ```json
 {
   "status": "healthy",
+  "timestamp": "2026-10-17T18:50:00.000Z",
+  "eventCode": "SSF2026",
   "system": {
     "platform": "linux",
     "architecture": "s390x",
-    "nodeVersion": "v20.x.x"
+    "nodeVersion": "v22.x.x",
+    "uptimeSeconds": 42,
+    "memoryUsageMB": {
+      "rss": 82.5,
+      "heapTotal": 45.2,
+      "heapUsed": 38.1
+    }
   },
   "dataEngine": {
     "isLoaded": true,
     "totalRecordsLoaded": 18249,
     "stationsIndexed": 1804,
-    "districtsCovered": 36
+    "districtsCovered": 36,
+    "alertsCount": 2865,
+    "isSyntheticData": true
   }
 }
 ```
+
+Now open **`http://localhost:5000`** in your local browser to interact with the full web UI over the secure SSH tunnel.
 
 ---
 
@@ -130,7 +133,7 @@ Create `/etc/systemd/system/panisafe.service`:
 
 ```ini
 [Unit]
-Description=Pani Safe Groundwater Platform (IBM Z Datathon 2026)
+Description=Pani Safe Groundwater Decision-Support Platform (IBM Z Datathon 2026 - SSF2026)
 After=network.target
 
 [Service]
@@ -157,37 +160,9 @@ sudo systemctl status panisafe
 
 ---
 
-## 6. Docker Deployment on LinuxONE (Optional)
+## 6. Security & Safe Evaluation Principles
 
-If running within a Docker container on LinuxONE, use an official multi-arch Node image:
-
-Create `Dockerfile` in root:
-
-```dockerfile
-FROM node:22-slim AS builder
-WORKDIR /app
-COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm install
-COPY frontend ./frontend
-RUN cd frontend && npm run build
-
-FROM node:22-slim
-WORKDIR /app
-COPY backend/package*.json ./backend/
-RUN cd backend && npm install --omit=dev
-COPY backend ./backend
-COPY --from=builder /app/frontend/dist ./frontend/dist
-
-EXPOSE 5000
-ENV PORT=5000
-ENV NODE_ENV=production
-
-CMD ["node", "backend/src/server.js"]
-```
-
-Build and run on s390x:
-
-```bash
-docker build -t panisafe:s390x .
-docker run -d -p 5000:5000 --name panisafe-app panisafe:s390x
-```
+- **No Public Port Exposure:** Keep the backend bound to `localhost:5000` and view via SSH port forwarding (`-L 5000:localhost:5000`).
+- **Throwaway Demo Credentials:** Use `analyst.demo@panisafe.in` / `DemoAnalyst2026!`.
+- **Private Key Hygiene:** Never copy private keys (`work/linuxone_ed25519`) into Git or print them to stdout.
+- **Auditable State:** Feedback submissions are stored locally in `backend/data/feedback.json`.
