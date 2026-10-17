@@ -74,7 +74,7 @@ export default function MapPage({ navigate }) {
         {/* Header */}
         <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 className="page-title">Maharashtra Groundwater Geographic Overview</h1>
+            <h1 className="page-title">Maharashtra Geographic Overview</h1>
             <p className="page-subtitle">
               Spatial exploration of simulated monitoring stations across Maharashtra. Station coordinates are modeled around district centroids for prototype evaluation and colored by preliminary screening status.
             </p>
@@ -86,7 +86,7 @@ export default function MapPage({ navigate }) {
           Station markers reflect simulated coordinates modeled around Maharashtra district centroids for prototype evaluation. Markers indicate whether synthetic benchmark records crossed preliminary screening benchmarks. <strong>Simulated coordinates do not identify physical private wellheads, live water contamination plumes, or municipal water supply networks.</strong>
         </AlertNotice>
 
-        {/* Filters */}
+        {/* Filters Bar */}
         <div className="filter-bar">
           <div className="filter-group" style={{ flex: 1.5 }}>
             <label className="filter-label">Search Station / Village</label>
@@ -123,7 +123,7 @@ export default function MapPage({ navigate }) {
               onChange={(e) => setFilters(prev => ({ ...prev, screeningStatus: e.target.value }))}
             >
               <option value="all">All Stations ({stations.length})</option>
-              <option value="flagged">Threshold Exceeded Only</option>
+              <option value="flagged">Benchmark Exceeded Only</option>
               <option value="clean">Within Screening Limits</option>
             </select>
           </div>
@@ -139,32 +139,40 @@ export default function MapPage({ navigate }) {
           </div>
         </div>
 
-        {/* Stats summary bar */}
+        {/* Stats Summary Bar */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '16px',
-          marginBottom: '20px'
+          marginBottom: '24px'
         }}>
-          <div style={{ background: '#FFFFFF', padding: '12px 16px', borderRadius: '8px', border: '1px solid #DDE5E1', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <MapPin size={22} color="#0D9488" />
+          <div className="card p-4 flex items-center gap-3.5">
+            <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#14B8A6' }}>
+              <MapPin size={20} />
+            </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Plotted Stations</div>
-              <strong style={{ fontSize: '1.2rem', color: '#0F382A' }}>{filteredStations.length.toLocaleString()}</strong>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.55)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Plotted Stations</div>
+              <strong className="font-body font-semibold text-2xl text-slate-100 tabular-nums block mt-0.5">{filteredStations.length.toLocaleString()}</strong>
             </div>
           </div>
-          <div style={{ background: '#FFFFFF', padding: '12px 16px', borderRadius: '8px', border: '1px solid #DDE5E1', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <ShieldAlert size={22} color="#D97706" />
+
+          <div className="card p-4 flex items-center gap-3.5 border-l-2 border-l-amber-500">
+            <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(217, 119, 6, 0.1)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
+              <ShieldAlert size={20} />
+            </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Threshold Exceeded</div>
-              <strong style={{ fontSize: '1.2rem', color: '#D97706' }}>{flaggedCount.toLocaleString()}</strong>
+              <div style={{ fontSize: '0.75rem', color: '#FCD34D', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Review Recommended</div>
+              <strong className="font-body font-semibold text-2xl text-amber-400 tabular-nums block mt-0.5">{flaggedCount.toLocaleString()}</strong>
             </div>
           </div>
-          <div style={{ background: '#FFFFFF', padding: '12px 16px', borderRadius: '8px', border: '1px solid #DDE5E1', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <CheckCircle2 size={22} color="#059669" />
+
+          <div className="card p-4 flex items-center gap-3.5 border-l-2 border-l-emerald-500">
+            <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+              <CheckCircle2 size={20} />
+            </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Within Screening Limits</div>
-              <strong style={{ fontSize: '1.2rem', color: '#059669' }}>{cleanCount.toLocaleString()}</strong>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.55)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Within Screening Limits</div>
+              <strong className="font-body font-semibold text-2xl text-emerald-400 tabular-nums block mt-0.5">{cleanCount.toLocaleString()}</strong>
             </div>
           </div>
         </div>
@@ -173,14 +181,14 @@ export default function MapPage({ navigate }) {
         <div style={{ marginBottom: '32px' }}>
           {loading ? (
             <div style={{
-              height: '560px',
+              height: '580px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#F1F5F3',
-              borderRadius: '10px',
-              border: '1px solid #DDE5E1',
-              color: '#4B5E57'
+              background: '#070B11',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: '#14B8A6'
             }}>
               Loading Maharashtra spatial markers...
             </div>
@@ -196,21 +204,25 @@ export default function MapPage({ navigate }) {
         </div>
 
         {/* Map Context Guide */}
-        <div className="card" style={{ background: '#FFFFFF' }}>
-          <h3 className="card-title" style={{ marginBottom: '10px' }}>
+        <div className="card p-6">
+          <h3 className="font-body font-semibold text-lg text-slate-200 mb-2">
             Understanding the Spatial Distribution of Groundwater Records
           </h3>
-          <p style={{ fontSize: '0.9rem', color: '#4B5E57', lineHeight: 1.6, marginBottom: '12px' }}>
+          <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.65, marginBottom: '20px' }}>
             In Maharashtra, groundwater characteristics correlate strongly with hydrogeological formations. The majority of the state lies upon Cretaceous-Eocene Deccan Volcanic Basalt ('Deccan Traps'), where groundwater occurs predominantly in weathered zones, fractured joints, and vesicular units. 
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', fontSize: '0.85rem', color: '#334155' }}>
-            <div style={{ background: '#F8FAF9', padding: '14px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-              <strong style={{ color: '#0F382A', display: 'block', marginBottom: '4px' }}>Salinity & TDS Variations</strong>
-              Elevated TDS is frequently observed in inland semi-arid basins (e.g. parts of Purna and Tapi river valleys) and coastal aquifers experiencing marine water influence.
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+              <strong style={{ color: '#14B8A6', display: 'block', marginBottom: '6px' }}>Salinity & TDS Variations</strong>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.65)', lineHeight: 1.55 }}>
+                Elevated TDS is frequently observed in inland semi-arid basins (e.g., parts of Purna and Tapi river valleys) and coastal aquifers experiencing marine water influence.
+              </p>
             </div>
-            <div style={{ background: '#F8FAF9', padding: '14px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-              <strong style={{ color: '#0F382A', display: 'block', marginBottom: '4px' }}>pH Alkaline Tendencies</strong>
-              Basalt weathering releases alkaline earth metals, typically yielding neutral to mildly alkaline groundwater (pH 7.2 to 8.4) across most dug wells.
+            <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+              <strong style={{ color: '#14B8A6', display: 'block', marginBottom: '6px' }}>pH Alkaline Tendencies</strong>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.65)', lineHeight: 1.55 }}>
+                Basalt weathering releases alkaline earth metals, typically yielding neutral to mildly alkaline groundwater (pH 7.2 to 8.4) across most dug wells.
+              </p>
             </div>
           </div>
         </div>

@@ -81,7 +81,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-main)' }}>
         <Navbar currentPath={currentPath} navigate={navigate} />
         <main style={{ flex: 1 }}>
           {pageContent}

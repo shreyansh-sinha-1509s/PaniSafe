@@ -1,11 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X, LogOut, LogIn } from 'lucide-react';
+import { fetchHealth } from '../services/api';
+import { Menu, X, LogOut, LogIn, Cpu, ShieldCheck } from 'lucide-react';
 
 export default function Navbar({ currentPath, navigate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout, demoLogin, isAuthenticated } = useAuth();
+  const [telemetry, setTelemetry] = useState({
+    arch: null,
+    nodeVersion: null,
+    isS390x: false,
+    checked: false
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchHealth()
+      .then(res => {
+        if (!isMounted) return;
+        const arch = res?.system?.architecture || 'x64';
+        const nodeVersion = res?.system?.nodeVersion || 'v24';
+        setTelemetry({
+          arch,
+          nodeVersion,
+          isS390x: arch.toLowerCase().includes('s390x'),
+          checked: true
+        });
+      })
+      .catch(() => {
+        if (isMounted) {
+          setTelemetry({ arch: 'x64', nodeVersion: 'v24', isS390x: false, checked: true });
+        }
+      });
+    return () => { isMounted = false; };
+  }, []);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -24,81 +53,59 @@ export default function Navbar({ currentPath, navigate }) {
   };
 
   return (
-    <header style={{
-      background: '#FFFFFF',
-      borderBottom: '1px solid #DDE5E1',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      boxShadow: '0 1px 3px rgba(15, 56, 42, 0.04)'
-    }}>
+    <header className="sticky top-0 z-[100] bg-[#070B11]/95 backdrop-blur-md border-b border-white/8 select-none">
       {/* Top Banner Notice */}
-      <div style={{
-        background: '#0F382A',
-        color: '#E2E8F0',
-        padding: '5px 24px',
-        fontSize: '0.75rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        fontWeight: 500
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            display: 'inline-block',
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            background: '#2DD4BF'
-          }} />
-          <span>IBM Z Datathon 2026 (SSF2026) • Synthetic Demonstration Dataset • Decision-Support Screening Prototype</span>
+      <div className="bg-[#05080E] border-b border-white/6 text-slate-300 px-4 sm:px-6 py-1.5 text-[11px] font-body flex justify-between items-center">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 inline-block" />
+          <span className="text-slate-200 font-medium">IBM Z Datathon 2026 (SSF2026)</span>
+          <span className="text-white/20">•</span>
+          <span className="text-slate-400">Deterministic Synthetic Dataset (Seed 20260427)</span>
+          <span className="text-white/20">•</span>
+          <span className="text-amber-400 font-medium">Decision-Support Screening</span>
         </div>
-        <div style={{ display: 'none', mdDisplay: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ color: '#94A3B8' }}>LinuxONE s390x Ready</span>
-          <span style={{ color: '#2DD4BF', fontWeight: 600 }}>18,249 Benchmark Records (Not Lab Certification)</span>
+        <div className="hidden lg:flex items-center gap-4">
+          {telemetry.isS390x ? (
+            <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+              <Cpu size={12} />
+              <span>LinuxONE s390x Verified</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+              <Cpu size={12} className="text-teal-400" />
+              <span>{telemetry.nodeVersion || 'Node.js'} • {telemetry.arch || 'x64'} (s390x Ready)</span>
+            </div>
+          )}
+          <span className="text-slate-300 font-medium">18,249 Records • 36 Districts</span>
         </div>
       </div>
 
       {/* Main Navbar */}
-      <div className="container" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '68px'
-      }}>
-        <div style={{ cursor: 'pointer' }} onClick={() => handleNav('/')}>
+      <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+        {/* Brand / Logo */}
+        <div
+          onClick={() => handleNav('/')}
+          className="cursor-pointer hover:opacity-90 transition-opacity"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && handleNav('/')}
+        >
           <Logo />
         </div>
 
         {/* Desktop Navigation Links */}
-        <nav style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
-        }} className="desktop-nav">
+        <nav className="hidden lg:flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-full p-1 backdrop-blur-md">
           {navLinks.map((link) => {
             const isActive = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
             return (
               <button
                 key={link.path}
                 onClick={() => handleNav(link.path)}
-                style={{
-                  background: isActive ? '#F0FDFA' : 'transparent',
-                  color: isActive ? '#0F766E' : '#334155',
-                  border: isActive ? '1px solid #CCFBF1' : '1px solid transparent',
-                  padding: '7px 12px',
-                  borderRadius: '6px',
-                  fontSize: '0.875rem',
-                  fontWeight: isActive ? 600 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseOver={(e) => {
-                  if (!isActive) e.currentTarget.style.color = '#0F382A';
-                }}
-                onMouseOut={(e) => {
-                  if (!isActive) e.currentTarget.style.color = '#334155';
-                }}
+                className={`px-3.5 py-1.5 text-xs font-medium font-body rounded-full transition-colors cursor-pointer ${
+                  isActive
+                    ? 'bg-white/10 text-white shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
               >
                 {link.name}
               </button>
@@ -106,133 +113,78 @@ export default function Navbar({ currentPath, navigate }) {
           })}
         </nav>
 
-        {/* Action Controls & Auth */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* User / Demo Auth Buttons */}
+        <div className="flex items-center gap-2">
           {isAuthenticated ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#F1F5F3',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                color: '#0F382A'
-              }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: '#0D9488',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: 700
-                }}>
-                  {user.fullName ? user.fullName[0] : 'U'}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-                  <span style={{ fontWeight: 600 }}>{user.fullName?.split(' ')[0]}</span>
-                  <span style={{ fontSize: '0.7rem', color: '#0D9488' }}>
-                    {user.isDemoAccount ? 'Demo Analyst' : 'Researcher'}
+            <div className="flex items-center gap-2">
+              <div className="border border-white/15 bg-white/[0.04] rounded-full px-3.5 py-1 text-xs text-slate-200 flex items-center gap-2 font-body backdrop-blur-md">
+                <ShieldCheck size={14} className="text-[#00E5FF]" />
+                <span className="font-medium text-white">{user?.fullName || 'Analyst'}</span>
+                {user?.isDemoAccount && (
+                  <span className="bg-[#00E5FF]/15 text-[#00E5FF] text-[10px] px-2 py-0.5 rounded-full font-medium">
+                    Demo
                   </span>
-                </div>
+                )}
               </div>
               <button
                 onClick={logout}
+                className="border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] rounded-full w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
                 title="Log Out"
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '6px 8px' }}
               >
-                <LogOut size={15} />
+                <LogOut size={14} />
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="flex items-center gap-2">
               <button
-                onClick={async () => {
-                  await demoLogin();
-                  handleNav('/dashboard');
-                }}
-                className="btn btn-secondary btn-sm"
-                title="Quick demo access with pre-configured analyst profile"
+                onClick={() => demoLogin().then(() => handleNav('/dashboard'))}
+                className="border border-white/15 hover:border-white/25 bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 rounded-full px-4 py-1.5 text-xs font-medium font-body transition-colors cursor-pointer backdrop-blur-md"
+                title="Quick 1-click login as Demo Analyst"
               >
-                Demo Sign In
+                Demo Access
               </button>
               <button
                 onClick={() => handleNav('/login')}
-                className="btn btn-primary btn-sm"
+                className="bg-[#00E5FF]/20 hover:bg-[#00E5FF]/30 text-[#00E5FF] border border-[#00E5FF]/40 rounded-full px-4 py-1.5 text-xs font-medium font-body flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <LogIn size={14} />
+                <LogIn size={13} />
                 <span>Sign In</span>
               </button>
             </div>
           )}
 
-          {/* Mobile menu toggle */}
+          {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            style={{
-              display: 'none',
-              background: 'none',
-              border: 'none',
-              color: '#0F382A',
-              cursor: 'pointer',
-              padding: '6px'
-            }}
-            className="mobile-nav-toggle"
+            className="lg:hidden border border-white/10 bg-white/[0.04] rounded-md w-8 h-8 flex items-center justify-center text-slate-200 cursor-pointer"
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={17} /> : <Menu size={17} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div style={{
-          background: '#FFFFFF',
-          borderBottom: '1px solid #DDE5E1',
-          padding: '16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px'
-        }}>
-          {navLinks.map((link) => (
-            <button
-              key={link.path}
-              onClick={() => handleNav(link.path)}
-              style={{
-                textAlign: 'left',
-                padding: '10px 14px',
-                borderRadius: '6px',
-                background: currentPath === link.path ? '#F0FDFA' : 'transparent',
-                color: currentPath === link.path ? '#0F766E' : '#141E1B',
-                border: 'none',
-                fontWeight: currentPath === link.path ? 600 : 500,
-                fontSize: '0.95rem'
-              }}
-            >
-              {link.name}
-            </button>
-          ))}
+        <div className="lg:hidden bg-[#0E1520] border-t border-white/8 px-5 py-3 flex flex-col gap-1 shadow-xl">
+          {navLinks.map((link) => {
+            const isActive = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
+            return (
+              <button
+                key={link.path}
+                onClick={() => handleNav(link.path)}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-body transition-colors ${
+                  isActive
+                    ? 'bg-teal-600/20 text-teal-300 font-medium'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {link.name}
+              </button>
+            );
+          })}
         </div>
       )}
-
-      {/* Media query styling inline fallback */}
-      <style>{`
-        @media (max-width: 992px) {
-          .desktop-nav {
-            display: none !important;
-          }
-          .mobile-nav-toggle {
-            display: block !important;
-          }
-        }
-      `}</style>
     </header>
   );
 }

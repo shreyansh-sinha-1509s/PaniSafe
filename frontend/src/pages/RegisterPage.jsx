@@ -48,30 +48,30 @@ export default function RegisterPage({ navigate }) {
           <div style={{ display: 'inline-block', marginBottom: '12px' }}>
             <Logo size={40} showText={false} />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0F382A' }}>
+          <h1 className="page-title" style={{ fontSize: '2.4rem' }}>
             Create Research Account
           </h1>
-          <p style={{ fontSize: '0.9rem', color: '#64748B', marginTop: '4px' }}>
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.65)', marginTop: '4px' }}>
             Register to save station bookmarks and track audit notes.
           </p>
         </div>
 
         {/* Public Access Notice */}
         <div style={{
-          background: '#F0FDFA',
-          border: '1px solid #CCFBF1',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          marginBottom: '20px',
+          background: 'rgba(13, 148, 136, 0.08)',
+          border: '1px solid rgba(13, 148, 136, 0.25)',
+          borderRadius: '12px',
+          padding: '14px 18px',
+          marginBottom: '24px',
           fontSize: '0.825rem',
-          color: '#0F766E',
-          lineHeight: 1.4
+          color: '#E2E8F0',
+          lineHeight: 1.5
         }}>
-          <strong>Open Data Platform: </strong>
-          Registration is completely optional. Public groundwater exploration and CSV downloads do not require an account.
+          <strong style={{ color: '#14B8A6' }}>Open Data Note: </strong>
+          Registration is completely optional. All groundwater screening data and mapping tools are publicly accessible without signing up.
         </div>
 
-        <div className="card" style={{ padding: '32px' }}>
+        <div className="card rounded-2xl" style={{ padding: '36px' }}>
           {error && (
             <AlertNotice type="danger" title="Registration Error">
               {error}
@@ -80,70 +80,70 @@ export default function RegisterPage({ navigate }) {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Full Name <span style={{ color: '#DC2626' }}>*</span></label>
+              <label className="form-label">Full Name *</label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="text"
                   name="fullName"
-                  className="form-input"
-                  style={{ paddingLeft: '34px' }}
-                  placeholder="e.g., Meera Joshi"
+                  type="text"
+                  className="input"
+                  style={{ paddingLeft: '36px' }}
+                  placeholder="e.g., Dr. Ananya Deshmukh"
                   value={form.fullName}
                   onChange={handleChange}
                   required
                 />
-                <User size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '12px' }} />
+                <User size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email Address <span style={{ color: '#DC2626' }}>*</span></label>
+              <label className="form-label">Email Address *</label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="email"
                   name="email"
-                  className="form-input"
-                  style={{ paddingLeft: '34px' }}
-                  placeholder="e.g., meera.joshi@research.org"
+                  type="email"
+                  className="input"
+                  style={{ paddingLeft: '36px' }}
+                  placeholder="analyst@university.edu.in"
                   value={form.email}
                   onChange={handleChange}
                   required
                 />
-                <Mail size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '12px' }} />
+                <Mail size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Organization / Institution</label>
+              <label className="form-label">Organization / Affiliation</label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="text"
                   name="organization"
-                  className="form-input"
-                  style={{ paddingLeft: '34px' }}
-                  placeholder="e.g., Savitribai Phule Pune University"
+                  type="text"
+                  className="input"
+                  style={{ paddingLeft: '36px' }}
+                  placeholder="e.g., Water Resources Research Lab"
                   value={form.organization}
                   onChange={handleChange}
                 />
-                <Building size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '12px' }} />
+                <Building size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password (Min 8 characters) <span style={{ color: '#DC2626' }}>*</span></label>
+            <div className="form-group" style={{ marginBottom: '24px' }}>
+              <label className="form-label">Password * (Min 8 characters)</label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="password"
                   name="password"
-                  className="form-input"
-                  style={{ paddingLeft: '34px' }}
+                  type="password"
+                  className="input"
+                  style={{ paddingLeft: '36px' }}
                   placeholder="••••••••"
                   value={form.password}
                   onChange={handleChange}
                   required
                   minLength={8}
                 />
-                <Key size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '12px' }} />
+                <Key size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
               </div>
             </div>
 
@@ -151,20 +151,20 @@ export default function RegisterPage({ navigate }) {
               type="submit"
               className="btn btn-primary"
               disabled={loading}
-              style={{ width: '100%', marginTop: '8px' }}
+              style={{ width: '100%' }}
             >
-              {loading ? <span>Creating Account...</span> : <span>Register Practitioner Account</span>}
+              {loading ? <span>Creating Account...</span> : <span>Create Account</span>}
             </button>
           </form>
 
-          <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: '#64748B' }}>
+          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.55)' }}>
             Already have an account?{' '}
             <a
               href="#/login"
               onClick={(e) => { e.preventDefault(); navigate('/login'); }}
-              style={{ color: '#0D9488', fontWeight: 600 }}
+              style={{ color: '#14B8A6', fontWeight: 600 }}
             >
-              Sign In
+              Sign in here
             </a>
           </div>
         </div>

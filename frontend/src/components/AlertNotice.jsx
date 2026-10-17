@@ -1,59 +1,53 @@
 import React from 'react';
-import { AlertTriangle, Info, ShieldCheck, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Info, ShieldCheck, AlertCircle, ShieldAlert } from 'lucide-react';
 
 export default function AlertNotice({
   type = 'disclaimer',
   title = '',
   children,
+  className = '',
   style = {}
 }) {
-  let bg = '#F8FAF9';
-  let border = '#DDE5E1';
-  let text = '#4B5E57';
+  let accentColor = '#0D9488';
   let Icon = Info;
-  let iconColor = '#0D9488';
 
   if (type === 'warning') {
-    bg = '#FFFBEB';
-    border = '#FDE68A';
-    text = '#92400E';
+    accentColor = '#D97706';
     Icon = AlertTriangle;
-    iconColor = '#D97706';
   } else if (type === 'danger') {
-    bg = '#FEF2F2';
-    border = '#FECACA';
-    text = '#991B1B';
+    accentColor = '#DC2626';
     Icon = AlertCircle;
-    iconColor = '#DC2626';
   } else if (type === 'success') {
-    bg = '#F0FDF4';
-    border = '#BBF7D0';
-    text = '#166534';
+    accentColor = '#059669';
     Icon = ShieldCheck;
-    iconColor = '#16A34A';
+  } else if (type === 'disclaimer') {
+    accentColor = '#0D9488';
+    Icon = ShieldAlert;
   }
 
   return (
     <div
+      className={`card p-4 sm:p-4.5 flex items-start gap-3.5 mb-6 border-l-[3px] ${className}`}
       style={{
-        background: bg,
-        border: `1px solid ${border}`,
-        borderRadius: '8px',
-        padding: '14px 18px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px',
-        color: text,
-        fontSize: '0.875rem',
-        lineHeight: 1.5,
-        marginBottom: '20px',
+        borderLeftColor: accentColor,
         ...style
       }}
     >
-      <Icon size={18} color={iconColor} style={{ flexShrink: 0, marginTop: '2px' }} />
-      <div style={{ flex: 1 }}>
-        {title && <div style={{ fontWeight: 600, marginBottom: '4px' }}>{title}</div>}
-        <div>{children}</div>
+      <div
+        className="w-7 h-7 rounded-md bg-white/[0.04] flex items-center justify-center shrink-0 mt-0.5"
+        style={{ color: accentColor }}
+      >
+        <Icon size={16} />
+      </div>
+      <div className="flex-1 font-body text-left">
+        {title && (
+          <div className="font-semibold text-sm sm:text-[0.925rem] text-slate-100 mb-1 leading-snug">
+            {title}
+          </div>
+        )}
+        <div className="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+          {children}
+        </div>
       </div>
     </div>
   );

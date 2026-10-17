@@ -121,7 +121,7 @@ export default function AlertsPage({ navigate }) {
         {/* Header */}
         <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 className="page-title">Screening Alerts & Investigation Review</h1>
+            <h1 className="page-title">Screening Alerts & Investigation Queue</h1>
             <p className="page-subtitle">
               Prioritization queue of historical records crossing preliminary environmental thresholds. Objective criteria designed to triage stations for field validation.
             </p>
@@ -134,7 +134,7 @@ export default function AlertsPage({ navigate }) {
 
         {/* Scientific Disclaimer */}
         <AlertNotice type="warning" title="Neutral Screening Terminology Notice">
-          Screening flags identify records exceeding preliminary benchmark values: <strong>pH outside 6.5–8.5</strong> or <strong>TDS exceeding 500 mg/L</strong>. In accordance with environmental monitoring standards, these are classified as <em>"Review Recommended"</em> or <em>"Selected Threshold Exceeded"</em>. They <strong>must not be labeled as 'toxic', 'dangerous', or 'confirmed contaminated'</strong> without physical resampling and complete microbiological and toxicological laboratory testing.
+          Screening flags identify records exceeding preliminary benchmark values: <strong>pH outside 6.5–8.5</strong> or <strong>TDS exceeding 500 mg/L</strong>. In accordance with environmental monitoring standards, these are classified as <em>"Review Recommended"</em> or <em>"Benchmark Exceeded"</em>. They <strong>must not be labeled as 'toxic', 'dangerous', or 'confirmed contaminated'</strong> without physical resampling and complete microbiological and toxicological laboratory testing.
         </AlertNotice>
 
         {/* Flag Metric Breakdown Cards */}
@@ -142,55 +142,55 @@ export default function AlertsPage({ navigate }) {
           <MetricCard
             title="Total Flagged Records"
             value={screeningStats ? screeningStats.totalFlagged : '...'}
-            subtext="Records requiring review"
+            subtext="Records crossing benchmark"
             icon={ShieldAlert}
-            accent="#D97706"
+            accent="#F59E0B"
           />
           <MetricCard
             title="pH Screening Flags"
             value={screeningStats ? screeningStats.phFlags : '...'}
             subtext="Values < 6.5 or > 8.5"
             icon={Activity}
-            accent="#DC2626"
+            accent="#EF4444"
           />
           <MetricCard
             title="TDS Screening Flags"
             value={screeningStats ? screeningStats.tdsFlags : '...'}
             subtext="Values > 500 mg/L"
             icon={Activity}
-            accent="#EA580C"
+            accent="#F97316"
           />
           <MetricCard
             title="Both Flags Active"
             value={screeningStats ? screeningStats.bothFlags : '...'}
-            subtext="Dual threshold exceedance"
+            subtext="Dual benchmark exceedance"
             icon={AlertTriangle}
-            accent="#9333EA"
+            accent="#A855F7"
           />
         </div>
 
         {/* Threshold Guidelines Reference Card */}
-        <div className="card" style={{ marginBottom: '24px', background: '#F8FAF9' }}>
-          <h3 className="card-title" style={{ marginBottom: '8px' }}>
-            Preliminary Screening Threshold Definitions
+        <div className="card" style={{ marginBottom: '28px' }}>
+          <h3 className="font-body font-semibold text-lg text-slate-200 mb-3">
+            Preliminary Screening Threshold Definitions (BIS IS 10500:2012)
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', fontSize: '0.85rem' }}>
-            <div style={{ background: '#FFFFFF', padding: '14px', borderRadius: '6px', border: '1px solid #DDE5E1' }}>
-              <div style={{ fontWeight: 700, color: '#0F382A', marginBottom: '4px' }}>pH Scale Range: 6.5 – 8.5</div>
-              <p style={{ color: '#4B5E57', lineHeight: 1.5 }}>
-                Derived from standard drinking water guidelines (BIS IS 10500:2012 acceptable limits). Readings outside this interval indicate potential pipe corrosion (&lt;6.5) or excessive incrustation/mineral hardness (&gt;8.5). Unrealistic readings (&lt;0 or &gt;14) are excluded as instrument errors.
+            <div className="card-subtle p-4 rounded-xl">
+              <div style={{ fontWeight: 600, color: '#14B8A6', marginBottom: '6px' }}>pH Scale Range: 6.5 – 8.5 (No relaxation)</div>
+              <p style={{ color: 'rgba(255, 255, 255, 0.65)', lineHeight: 1.55 }}>
+                Derived from standard drinking water guidelines (BIS IS 10500:2012 acceptable limits). Readings outside this interval indicate potential pipe corrosion (&lt;6.5) or excessive mineral encrustation (&gt;8.5). Unrealistic readings (&lt;0 or &gt;14) are excluded as instrument errors.
               </p>
             </div>
-            <div style={{ background: '#FFFFFF', padding: '14px', borderRadius: '6px', border: '1px solid #DDE5E1' }}>
-              <div style={{ fontWeight: 700, color: '#0F382A', marginBottom: '4px' }}>TDS Limit: &gt; 500 mg/L</div>
-              <p style={{ color: '#4B5E57', lineHeight: 1.5 }}>
+            <div className="card-subtle p-4 rounded-xl">
+              <div style={{ fontWeight: 600, color: '#14B8A6', marginBottom: '6px' }}>TDS Limit: &gt; 500 mg/L (Permissible to 2,000 mg/L)</div>
+              <p style={{ color: 'rgba(255, 255, 255, 0.65)', lineHeight: 1.55 }}>
                 Total Dissolved Solids reflects dissolved mineral content. While IS 10500 allows up to 2,000 mg/L in the absence of alternate sources, 500 mg/L represents the desirable threshold for palatability and screening triage. Zero TDS values are treated as unverified.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters Bar */}
         <div className="filter-bar">
           <div className="filter-group" style={{ flex: 1.5 }}>
             <label className="filter-label">Search Station / Village</label>
@@ -224,10 +224,24 @@ export default function AlertsPage({ navigate }) {
               value={filters.flagType}
               onChange={(e) => setFilters(prev => ({ ...prev, flagType: e.target.value }))}
             >
-              <option value="all">All Flagged Records</option>
-              <option value="ph">pH Flag Only</option>
-              <option value="tds">TDS Flag Only</option>
-              <option value="both">Both pH & TDS Flagged</option>
+              <option value="all">All Exceedances</option>
+              <option value="ph">pH Exceedances Only</option>
+              <option value="tds">TDS Exceedances Only</option>
+              <option value="both">Both pH & TDS Exceeded</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">Sort</label>
+            <select
+              className="filter-control"
+              value={filters.sort}
+              onChange={(e) => setFilters(prev => ({ ...prev, sort: e.target.value }))}
+            >
+              <option value="acquisitionTime">Sampling Date</option>
+              <option value="tds">TDS Value</option>
+              <option value="ph">pH Value</option>
+              <option value="district">District</option>
             </select>
           </div>
 
@@ -239,136 +253,155 @@ export default function AlertsPage({ navigate }) {
           </div>
         </div>
 
-        {/* Alert Records Table */}
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0F382A' }}>
-              Records Flagged for Investigation ({pagination.total.toLocaleString()} records)
-            </h3>
-            <span style={{ fontSize: '0.85rem', color: '#64748B' }}>
-              Page {pagination.page} of {pagination.totalPages || 1}
-            </span>
+        {/* Results Count & Limit Controls */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+          fontSize: '0.85rem',
+          color: 'rgba(255, 255, 255, 0.6)'
+        }}>
+          <div>
+            Showing <strong style={{ color: '#F59E0B' }}>{pagination.total.toLocaleString()}</strong> records flagged for screening review
           </div>
-
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Station / Location</th>
-                  <th>District</th>
-                  <th>Sampling Date</th>
-                  <th>pH Reading</th>
-                  <th>TDS Reading</th>
-                  <th>Flag Classification</th>
-                  <th>Screening Reason</th>
-                  <th style={{ textAlign: 'right' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
-                      Loading review queue...
-                    </td>
-                  </tr>
-                ) : records.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="table-empty">
-                      No records match the selected review criteria.
-                    </td>
-                  </tr>
-                ) : (
-                  records.map(rec => (
-                    <tr key={rec.id} onClick={() => setSelectedRecord(rec)} style={{ cursor: 'pointer' }}>
-                      <td>
-                        <div style={{ fontWeight: 600, color: '#0F382A' }}>{rec.station}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#7E938B' }}>{rec.village || rec.tehsil}</div>
-                      </td>
-                      <td>{rec.district}</td>
-                      <td style={{ color: '#4B5E57', whiteSpace: 'nowrap' }}>
-                        {rec.samplingDate || rec.acquisitionTime?.substring(0, 10)}
-                      </td>
-                      <td>
-                        {rec.ph !== null ? (
-                          <span style={{ fontWeight: 600, color: rec.phFlag ? '#DC2626' : '#141E1B' }}>
-                            {rec.ph.toFixed(2)}
-                            {rec.phFlag && ' (Flag)'}
-                          </span>
-                        ) : 'N/A'}
-                      </td>
-                      <td>
-                        {rec.tds !== null ? (
-                          <span style={{ fontWeight: 600, color: rec.tdsFlag ? '#DC2626' : '#141E1B' }}>
-                            {Math.round(rec.tds)} mg/L
-                            {rec.tdsFlag && ' (Flag)'}
-                          </span>
-                        ) : 'N/A'}
-                      </td>
-                      <td>
-                        {rec.phFlag && rec.tdsFlag ? (
-                          <span className="badge badge-flag-red">Dual Flag (pH + TDS)</span>
-                        ) : rec.phFlag ? (
-                          <span className="badge badge-flag-amber">pH Out of Range</span>
-                        ) : (
-                          <span className="badge badge-flag-amber">TDS &gt; 500 mg/L</span>
-                        )}
-                      </td>
-                      <td style={{ maxWidth: '300px', fontSize: '0.8rem', color: '#4B5E57' }}>
-                        {rec.screeningReason}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedRecord(rec);
-                          }}
-                          className="btn btn-secondary btn-sm"
-                        >
-                          <Eye size={13} />
-                          <span>Inspect</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="pagination">
-            <div>
-              Showing Page <strong>{pagination.page}</strong> of <strong>{pagination.totalPages || 1}</strong>
-            </div>
-            <div className="pagination-controls">
-              <button
-                className="btn btn-secondary btn-sm"
-                disabled={pagination.page <= 1 || loading}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-              >
-                <ChevronLeft size={14} />
-                <span>Previous</span>
-              </button>
-              <button
-                className="btn btn-secondary btn-sm"
-                disabled={pagination.page >= pagination.totalPages || loading}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-              >
-                <span>Next</span>
-                <ChevronRight size={14} />
-              </button>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>Rows:</span>
+            <select
+              value={pagination.limit}
+              onChange={(e) => setPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
+              className="form-select"
+              style={{
+                width: 'auto',
+                padding: '4px 28px 4px 12px',
+                fontSize: '0.8rem',
+                minWidth: '70px'
+              }}
+            >
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
           </div>
         </div>
 
-        {/* Record Details Slide Drawer */}
-        {selectedRecord && (
-          <RecordDrawer
-            record={selectedRecord}
-            onClose={() => setSelectedRecord(null)}
-            onNavigateStation={(stId) => navigate(`/stations/${stId}`)}
-          />
-        )}
+        {/* Alerts Table */}
+        <div className="table-container" style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Station / Location</th>
+                <th>District</th>
+                <th>Sampling Date</th>
+                <th>pH Value</th>
+                <th>TDS (mg/L)</th>
+                <th>Screening Exceedance Reason</th>
+                <th style={{ textAlign: 'right' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '48px', color: '#14B8A6' }}>
+                    Loading prioritized screening review queue...
+                  </td>
+                </tr>
+              ) : records.length === 0 ? (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '48px', color: 'rgba(255, 255, 255, 0.45)' }}>
+                    No flagged records match the selected filter criteria.
+                  </td>
+                </tr>
+              ) : (
+                records.map(r => (
+                  <tr key={r.recordId}>
+                    <td>
+                      <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{r.station}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.45)' }}>
+                        {r.village ? `${r.village}, ` : ''}{r.tehsil || ''}
+                      </div>
+                    </td>
+                    <td>{r.district}</td>
+                    <td>{r.samplingDate || r.acquisitionTime?.substring(0, 10)}</td>
+                    <td>
+                      <span style={{ fontWeight: 700, color: r.phFlag ? '#EF4444' : '#FFFFFF' }}>
+                        {r.ph !== null ? r.ph : 'N/A'}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 700, color: r.tdsFlag ? '#F59E0B' : '#FFFFFF' }}>
+                        {r.tds !== null ? r.tds : 'N/A'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontSize: '0.825rem', color: '#FCD34D', fontWeight: 500 }}>
+                          {r.screeningReason || 'Preliminary benchmark threshold exceeded'}
+                        </span>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          {r.phFlag && (
+                            <span className="badge badge-red" style={{ fontSize: '0.675rem', padding: '2px 6px' }}>
+                              pH Exceedance
+                            </span>
+                          )}
+                          {r.tdsFlag && (
+                            <span className="badge badge-amber" style={{ fontSize: '0.675rem', padding: '2px 6px' }}>
+                              TDS &gt; 500 mg/L
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        onClick={() => setSelectedRecord(r)}
+                        className="btn btn-glass btn-sm"
+                        style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                      >
+                        <Eye size={13} />
+                        <span>Inspect</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="pagination-bar">
+              <div>
+                Page {pagination.page} of {pagination.totalPages} ({pagination.total.toLocaleString()} total items)
+              </div>
+              <div className="pagination-controls">
+                <button
+                  disabled={pagination.page <= 1}
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  className="pagination-btn"
+                >
+                  <ChevronLeft size={14} />
+                  <span>Previous</span>
+                </button>
+                <button
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  className="pagination-btn"
+                >
+                  <span>Next</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Slide-over Inspection Drawer */}
+        <RecordDrawer
+          record={selectedRecord}
+          onClose={() => setSelectedRecord(null)}
+          onNavigateStation={(stId) => navigate(`/stations/${encodeURIComponent(stId)}`)}
+        />
       </div>
     </div>
   );

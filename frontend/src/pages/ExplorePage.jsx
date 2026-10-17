@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchDistricts, fetchRecords, getExportUrl } from '../services/api';
 import RecordDrawer from '../components/RecordDrawer';
+import AlertNotice from '../components/AlertNotice';
 import {
   Search,
   Download,
@@ -104,7 +105,7 @@ export default function ExplorePage({ navigate }) {
           <div>
             <h1 className="page-title">Explore Groundwater Records</h1>
             <p className="page-subtitle">
-              Comprehensive search across 18,249 historical Central Ground Water Board records. Transparent laboratory chemistry without fabricated values.
+              Comprehensive search across 18,249 historical sample events. Deterministic synthetic demonstration dataset modeled on Maharashtra regional hydrogeology.
             </p>
           </div>
           <button onClick={handleExportCsv} className="btn btn-secondary">
@@ -112,6 +113,11 @@ export default function ExplorePage({ navigate }) {
             <span>Download Filtered CSV</span>
           </button>
         </div>
+
+        {/* Disclaimer Notice */}
+        <AlertNotice type="disclaimer" title="Deterministic Synthetic Dataset (Seed 20260427)">
+          Records are generated using a deterministic fixed seed for reproducible evaluation across Maharashtra's 36 administrative districts. Screening flags indicate preliminary benchmark exceedance per BIS IS 10500:2012, not verified laboratory findings.
+        </AlertNotice>
 
         {/* Filter Controls Bar */}
         <div className="filter-bar">
@@ -126,7 +132,7 @@ export default function ExplorePage({ navigate }) {
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
               />
-              <Search size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '11px' }} />
+              <Search size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '10px', top: '11px' }} />
             </div>
           </div>
 
@@ -152,8 +158,8 @@ export default function ExplorePage({ navigate }) {
               onChange={(e) => handleFilterChange('needsReview', e.target.value)}
             >
               <option value="all">All Records</option>
-              <option value="true">Flagged for Review</option>
-              <option value="false">Within Thresholds</option>
+              <option value="true">Review Recommended Only</option>
+              <option value="false">Within Screening Limits</option>
             </select>
           </div>
 
@@ -197,24 +203,24 @@ export default function ExplorePage({ navigate }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '12px',
+          marginBottom: '16px',
           fontSize: '0.85rem',
-          color: '#4B5E57'
+          color: 'rgba(255, 255, 255, 0.6)'
         }}>
           <div>
-            Found <strong>{pagination.total.toLocaleString()}</strong> records matching query
+            Found <strong style={{ color: '#14B8A6' }}>{pagination.total.toLocaleString()}</strong> records matching query
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Rows per page:</span>
             <select
               value={pagination.limit}
               onChange={(e) => setPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
+              className="form-select"
               style={{
-                border: '1px solid #DDE5E1',
-                borderRadius: '4px',
-                padding: '3px 8px',
-                background: '#FFFFFF',
-                fontSize: '0.825rem'
+                width: 'auto',
+                padding: '4px 28px 4px 12px',
+                fontSize: '0.8rem',
+                minWidth: '70px'
               }}
             >
               <option value={25}>25</option>
@@ -225,8 +231,8 @@ export default function ExplorePage({ navigate }) {
         </div>
 
         {/* Explore Data Table */}
-        <div className="table-container">
-          <table>
+        <div className="table-container" style={{ overflowX: 'auto' }}>
+          <table className="data-table">
             <thead>
               <tr>
                 <th>Station / Location</th>
@@ -244,82 +250,68 @@ export default function ExplorePage({ navigate }) {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="10" style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+                  <td colSpan="10" style={{ textAlign: 'center', padding: '48px', color: '#14B8A6' }}>
                     Loading matching groundwater records...
                   </td>
                 </tr>
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="table-empty">
-                    No groundwater records found matching the given parameters. Try adjusting your search query.
+                  <td colSpan="10" style={{ textAlign: 'center', padding: '48px', color: 'rgba(255, 255, 255, 0.45)' }}>
+                    No records match your selected filters. Try broadening your search.
                   </td>
                 </tr>
               ) : (
-                records.map(rec => (
-                  <tr key={rec.id} onClick={() => setSelectedRecord(rec)} style={{ cursor: 'pointer' }}>
+                records.map((r) => (
+                  <tr key={r.recordId}>
                     <td>
-                      <div style={{ fontWeight: 600, color: '#0F382A' }}>{rec.station}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#7E938B' }}>{rec.village || rec.block || 'CGWB'}</div>
+                      <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{r.station}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.45)' }}>
+                        {r.village || 'Station Site'}
+                      </div>
                     </td>
-                    <td>{rec.district}</td>
-                    <td style={{ color: '#4B5E57', whiteSpace: 'nowrap' }}>
-                      {rec.samplingDate || rec.acquisitionTime?.substring(0, 10)}
-                    </td>
+                    <td>{r.district}</td>
+                    <td>{r.samplingDate || r.acquisitionTime?.substring(0, 10) || 'Historical'}</td>
                     <td>
-                      {rec.ph !== null ? (
-                        <span style={{ fontWeight: 600, color: rec.phFlag ? '#DC2626' : '#141E1B' }}>
-                          {rec.ph.toFixed(2)}
+                      {r.ph !== null ? (
+                        <span style={{ fontWeight: 600, color: r.phFlag ? '#F59E0B' : '#FFFFFF' }}>
+                          {r.ph}
                         </span>
                       ) : (
-                        <span style={{ color: '#94A3B8', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
                       )}
                     </td>
                     <td>
-                      {rec.tds !== null ? (
-                        <span style={{ fontWeight: 600, color: rec.tdsFlag ? '#DC2626' : '#141E1B' }}>
-                          {Math.round(rec.tds)}
+                      {r.tds !== null ? (
+                        r.tds === 0 ? (
+                          <span style={{ color: '#F59E0B', fontSize: '0.75rem' }}>0 (Unverified)</span>
+                        ) : (
+                          <span style={{ fontWeight: 600, color: r.tdsFlag ? '#F59E0B' : '#FFFFFF' }}>
+                            {r.tds}
+                          </span>
+                        )
+                      ) : (
+                        <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
+                      )}
+                    </td>
+                    <td>{r.ec !== null ? r.ec : <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>}</td>
+                    <td>{r.fluoride !== null ? r.fluoride : <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>}</td>
+                    <td>{r.nitrate !== null ? r.nitrate : <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>}</td>
+                    <td>
+                      {r.needsReview ? (
+                        <span className="badge badge-amber">
+                          ● Review Needed
                         </span>
                       ) : (
-                        <span style={{ color: '#94A3B8', fontStyle: 'italic', fontSize: '0.8rem' }}>
-                          {rec.isTdsUnverifiedZero ? 'Unverified 0' : 'N/A'}
+                        <span className="badge badge-green">
+                          ● Within Limits
                         </span>
-                      )}
-                    </td>
-                    <td>
-                      {rec.ec !== null ? (
-                        <span>{rec.ec}</span>
-                      ) : (
-                        <span style={{ color: '#94A3B8', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
-                      )}
-                    </td>
-                    <td>
-                      {rec.fluoride !== null ? (
-                        <span>{rec.fluoride}</span>
-                      ) : (
-                        <span style={{ color: '#94A3B8', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
-                      )}
-                    </td>
-                    <td>
-                      {rec.nitrate !== null ? (
-                        <span>{rec.nitrate}</span>
-                      ) : (
-                        <span style={{ color: '#94A3B8', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
-                      )}
-                    </td>
-                    <td>
-                      {rec.needsReview ? (
-                        <span className="badge badge-flag-amber">Review Needed</span>
-                      ) : (
-                        <span className="badge badge-flag-green">Within Limits</span>
                       )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedRecord(rec);
-                        }}
-                        className="btn btn-secondary btn-sm"
+                        onClick={() => setSelectedRecord(r)}
+                        className="btn btn-glass btn-sm"
+                        style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                       >
                         <Eye size={13} />
                         <span>Inspect</span>
@@ -330,41 +322,41 @@ export default function ExplorePage({ navigate }) {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Bar */}
+          {pagination.totalPages > 1 && (
+            <div className="pagination-bar">
+              <div>
+                Page {pagination.page} of {pagination.totalPages} ({pagination.total.toLocaleString()} total items)
+              </div>
+              <div className="pagination-controls">
+                <button
+                  disabled={pagination.page <= 1}
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  className="pagination-btn"
+                >
+                  <ChevronLeft size={14} />
+                  <span>Previous</span>
+                </button>
+                <button
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  className="pagination-btn"
+                >
+                  <span>Next</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Pagination */}
-        <div className="pagination">
-          <div>
-            Showing Page <strong>{pagination.page}</strong> of <strong>{pagination.totalPages || 1}</strong>
-          </div>
-          <div className="pagination-controls">
-            <button
-              className="btn btn-secondary btn-sm"
-              disabled={pagination.page <= 1 || loading}
-              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-            >
-              <ChevronLeft size={14} />
-              <span>Previous</span>
-            </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              disabled={pagination.page >= pagination.totalPages || loading}
-              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-            >
-              <span>Next</span>
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Record Details Slide Drawer */}
-        {selectedRecord && (
-          <RecordDrawer
-            record={selectedRecord}
-            onClose={() => setSelectedRecord(null)}
-            onNavigateStation={(stId) => navigate(`/stations/${stId}`)}
-          />
-        )}
+        {/* Slide-over Inspection Drawer */}
+        <RecordDrawer
+          record={selectedRecord}
+          onClose={() => setSelectedRecord(null)}
+          onNavigateStation={(stId) => navigate(`/stations/${encodeURIComponent(stId)}`)}
+        />
       </div>
     </div>
   );

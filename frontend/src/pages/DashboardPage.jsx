@@ -170,14 +170,14 @@ export default function DashboardPage({ navigate }) {
               Interactive analytics and decision-support screening based on a deterministic synthetic benchmark dataset modeled on Maharashtra regional hydrogeology and BIS IS 10500:2012 standards.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button onClick={handleExportCsv} className="btn btn-secondary" title="Export filtered records to CSV">
               <Download size={16} />
               <span>Export CSV</span>
             </button>
             <button onClick={() => navigate('/explore')} className="btn btn-primary">
               <Database size={16} />
-              <span>Explore All Records</span>
+              <span>Explore All 18,249 Records</span>
             </button>
           </div>
         </div>
@@ -200,21 +200,21 @@ export default function DashboardPage({ navigate }) {
             value={summaryData ? summaryData.totalRecords : '...'}
             subtext="Synthetic benchmark samples"
             icon={Database}
-            accent="#0F382A"
+            accent="#0D9488"
           />
           <MetricCard
             title="Unique Monitoring Stations"
             value={summaryData ? summaryData.totalStations : '...'}
             subtext="Individually disambiguated"
             icon={MapPin}
-            accent="#0D9488"
+            accent="#14B8A6"
           />
           <MetricCard
             title="District Coverage"
             value={summaryData ? `${summaryData.totalDistricts} Districts` : '...'}
             subtext="Statewide Maharashtra"
             icon={Layers}
-            accent="#166534"
+            accent="#64748B"
           />
           <MetricCard
             title="Flagged for Review"
@@ -226,21 +226,21 @@ export default function DashboardPage({ navigate }) {
           <MetricCard
             title="Valid pH Coverage"
             value={summaryData ? summaryData.validPhCount : '...'}
-            subtext={summaryData ? `${summaryData.missingPhCount} null values excluded` : ''}
+            subtext={summaryData ? `${summaryData.missingPhCount} null values preserved` : ''}
             icon={Activity}
-            accent="#0284C7"
+            accent="#0D9488"
           />
           <MetricCard
             title="Usable TDS Coverage"
             value={summaryData ? summaryData.validTdsCount : '...'}
             subtext={summaryData ? `${summaryData.missingTdsCount} unverified 0/nulls` : ''}
             icon={FileSpreadsheet}
-            accent="#4F46E5"
+            accent="#14B8A6"
           />
           <MetricCard
             title="Data Quality Completeness"
             value={summaryData ? `${summaryData.dataQualityIndex}%` : '...'}
-            subtext="Valid parameter completeness"
+            subtext="Average parameter completeness"
             icon={CheckCircle2}
             accent="#059669"
           />
@@ -259,12 +259,12 @@ export default function DashboardPage({ navigate }) {
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={histograms.ph} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="range" tick={{ fontSize: 11 }} angle={-25} textAnchor="end" />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+                  <XAxis dataKey="range" tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} angle={-25} textAnchor="end" />
+                  <YAxis tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} />
                   <Tooltip
                     formatter={(val, name, item) => [`${val.toLocaleString()} samples`, item.payload.label]}
-                    contentStyle={{ backgroundColor: '#0F382A', color: '#FFF', borderRadius: '6px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#0E1520', borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: '#F8FAFC' }}
                   />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {histograms.ph.map((entry, index) => (
@@ -287,16 +287,16 @@ export default function DashboardPage({ navigate }) {
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={histograms.tds} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="range" tick={{ fontSize: 11 }} angle={-25} textAnchor="end" />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+                  <XAxis dataKey="range" tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} angle={-25} textAnchor="end" />
+                  <YAxis tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} />
                   <Tooltip
                     formatter={(val, name, item) => [`${val.toLocaleString()} samples`, item.payload.label]}
-                    contentStyle={{ backgroundColor: '#0F382A', color: '#FFF', borderRadius: '6px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#0E1520', borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: '#F8FAFC' }}
                   />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {histograms.tds.map((entry, index) => (
-                      <Cell key={`tds-cell-${index}`} fill={entry.flag ? '#DC2626' : '#14B8A6'} />
+                      <Cell key={`tds-cell-${index}`} fill={entry.flag ? '#D97706' : '#0D9488'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -315,13 +315,13 @@ export default function DashboardPage({ navigate }) {
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={districtChartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-25} textAnchor="end" />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} angle={-25} textAnchor="end" />
+                  <YAxis tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0F382A', color: '#FFF', borderRadius: '6px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#0E1520', borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: '#F8FAFC' }}
                   />
-                  <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                  <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px', color: 'rgba(255,255,255,0.75)' }} />
                   <Bar dataKey="flagged" name="Review Needed" stackId="a" fill="#D97706" />
                   <Bar dataKey="clean" name="Within Threshold" stackId="a" fill="#0D9488" />
                 </BarChart>
@@ -342,18 +342,18 @@ export default function DashboardPage({ navigate }) {
                 <AreaChart data={trends} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                   <defs>
                     <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0D9488" stopOpacity={0.4}/>
+                      <stop offset="5%" stopColor="#0D9488" stopOpacity={0.25}/>
                       <stop offset="95%" stopColor="#0D9488" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.65)' }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0F382A', color: '#FFF', borderRadius: '6px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#0E1520', borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: '#F8FAFC' }}
                   />
-                  <Area type="monotone" dataKey="recordCount" name="Total Records" stroke="#0D9488" fillOpacity={1} fill="url(#colorRec)" />
-                  <Area type="monotone" dataKey="flaggedCount" name="Flagged Records" stroke="#D97706" fillOpacity={0} />
+                  <Area type="monotone" dataKey="recordCount" name="Total Records" stroke="#0D9488" strokeWidth={2} fillOpacity={1} fill="url(#colorRec)" />
+                  <Area type="monotone" dataKey="flaggedCount" name="Flagged Records" stroke="#D97706" strokeWidth={2} fillOpacity={0} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -410,8 +410,8 @@ export default function DashboardPage({ navigate }) {
               onChange={(e) => handleFilterChange('phFlag', e.target.value)}
             >
               <option value="all">Any pH</option>
-              <option value="true">pH Flagged (&lt;6.5 or &gt;8.5)</option>
-              <option value="false">pH Normal (6.5 - 8.5)</option>
+              <option value="true">Exceeds 6.5–8.5</option>
+              <option value="false">Within 6.5–8.5</option>
             </select>
           </div>
 
@@ -423,15 +423,16 @@ export default function DashboardPage({ navigate }) {
               onChange={(e) => handleFilterChange('tdsFlag', e.target.value)}
             >
               <option value="all">Any TDS</option>
-              <option value="true">TDS Flagged (&gt;500 mg/L)</option>
-              <option value="false">TDS Normal (≤500 mg/L)</option>
+              <option value="true">&gt; 500 mg/L Flagged</option>
+              <option value="false">≤ 500 mg/L Desirable</option>
             </select>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-end', paddingTop: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={handleResetFilters}
               className="btn btn-secondary"
+              style={{ width: '100%', padding: '9px 12px' }}
               title="Reset all filters"
             >
               <RotateCcw size={15} />
@@ -440,154 +441,137 @@ export default function DashboardPage({ navigate }) {
           </div>
         </div>
 
-        {/* Recent Screening Review Table */}
+        {/* Filtered Records Table Preview */}
         <div style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0F382A' }}>
-              Screening Records Table ({pagination.total.toLocaleString()} matching records)
-            </h3>
-            <span style={{ fontSize: '0.825rem', color: '#64748B' }}>
-              Showing {records.length} of {pagination.total} records
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div>
+              <h3 className="font-semibold text-lg text-slate-100">
+                Matching Groundwater Sample Records
+              </h3>
+              <p style={{ fontSize: '0.825rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                Showing {records.length} of {pagination.total.toLocaleString()} filtered records
+              </p>
+            </div>
+            <button onClick={() => navigate('/explore')} className="btn btn-secondary btn-sm">
+              <span>View in Full Data Explorer →</span>
+            </button>
           </div>
 
           <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Station Name</th>
-                  <th>District</th>
-                  <th>Sampling Date</th>
-                  <th>pH</th>
-                  <th>TDS (mg/L)</th>
-                  <th>Screening Status</th>
-                  <th>Screening Reason</th>
-                  <th style={{ textAlign: 'right' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recordsLoading ? (
+            {recordsLoading ? (
+              <div style={{ padding: '48px', textAlign: 'center', color: '#0D9488' }}>
+                Loading records from data engine...
+              </div>
+            ) : records.length === 0 ? (
+              <div style={{ padding: '48px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)' }}>
+                No records match the selected filter criteria. Try broadening your search.
+              </div>
+            ) : (
+              <table className="data-table">
+                <thead>
                   <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '36px', color: '#64748B' }}>
-                      Loading records from backend engine...
-                    </td>
+                    <th>Station Name</th>
+                    <th>District</th>
+                    <th>Sampling Date</th>
+                    <th>pH</th>
+                    <th>TDS (mg/L)</th>
+                    <th>Screening Status</th>
+                    <th style={{ textAlign: 'right' }}>Action</th>
                   </tr>
-                ) : records.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="table-empty">
-                      No records match the selected screening criteria. Try adjusting your filters.
-                    </td>
-                  </tr>
-                ) : (
-                  records.map(rec => (
-                    <tr key={rec.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedRecord(rec)}>
+                </thead>
+                <tbody>
+                  {records.map((r) => (
+                    <tr key={r.recordId}>
                       <td>
-                        <div style={{ fontWeight: 600, color: '#0F382A' }}>{rec.station}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#7E938B' }}>{rec.village || rec.tehsil || 'CGWB'}</div>
+                        <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{r.station}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.45)' }}>{r.village || 'Station Site'}</div>
                       </td>
+                      <td>{r.district}</td>
+                      <td>{r.samplingDate || r.acquisitionTime?.substring(0, 10) || 'Historical'}</td>
                       <td>
-                        <span style={{ fontWeight: 500 }}>{rec.district}</span>
-                      </td>
-                      <td style={{ color: '#4B5E57', whiteSpace: 'nowrap' }}>
-                        {rec.samplingDate || rec.acquisitionTime?.substring(0, 10)}
-                      </td>
-                      <td>
-                        {rec.ph !== null ? (
-                          <span style={{
-                            fontWeight: 600,
-                            color: rec.phFlag ? '#DC2626' : '#141E1B'
-                          }}>
-                            {rec.ph.toFixed(2)}
-                            {rec.phFlag && <span title="pH outside 6.5 - 8.5" style={{ marginLeft: '4px', color: '#DC2626' }}>*</span>}
+                        {r.ph !== null ? (
+                          <span style={{ fontWeight: 600, color: r.phFlag ? '#F59E0B' : '#FFFFFF' }}>
+                            {r.ph}
                           </span>
                         ) : (
-                          <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>N/A</span>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
                         )}
                       </td>
                       <td>
-                        {rec.tds !== null ? (
-                          <span style={{
-                            fontWeight: 600,
-                            color: rec.tdsFlag ? '#DC2626' : '#141E1B'
-                          }}>
-                            {Math.round(rec.tds)}
-                            {rec.tdsFlag && <span title="TDS exceeds 500 mg/L" style={{ marginLeft: '4px', color: '#DC2626' }}>*</span>}
-                          </span>
+                        {r.tds !== null ? (
+                          r.tds === 0 ? (
+                            <span style={{ color: '#F59E0B', fontSize: '0.75rem' }}>0 (Unverified)</span>
+                          ) : (
+                            <span style={{ fontWeight: 600, color: r.tdsFlag ? '#F59E0B' : '#FFFFFF' }}>
+                              {r.tds}
+                            </span>
+                          )
                         ) : (
-                          <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>
-                            {rec.isTdsUnverifiedZero ? 'Unverified 0' : 'N/A'}
-                          </span>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontStyle: 'italic', fontSize: '0.8rem' }}>N/A</span>
                         )}
                       </td>
                       <td>
-                        {rec.needsReview ? (
-                          <span className="badge badge-flag-amber">
-                            <span className="badge-dot" style={{ background: '#D97706' }} />
-                            Review Needed
+                        {r.needsReview ? (
+                          <span className="badge badge-amber">
+                            ● Review Recommended
                           </span>
                         ) : (
-                          <span className="badge badge-flag-green">
-                            <span className="badge-dot" style={{ background: '#059669' }} />
-                            Within Limits
+                          <span className="badge badge-green">
+                            ● Within Limits
                           </span>
                         )}
-                      </td>
-                      <td style={{ maxWidth: '280px', fontSize: '0.8rem', color: '#4B5E57' }}>
-                        {rec.screeningReason}
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedRecord(rec);
-                          }}
-                          className="btn btn-secondary btn-sm"
+                          onClick={() => setSelectedRecord(r)}
+                          className="btn btn-glass btn-sm"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                         >
                           <Eye size={13} />
-                          <span>Details</span>
+                          <span>Inspect</span>
                         </button>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            )}
 
-          {/* Pagination Controls */}
-          <div className="pagination">
-            <div>
-              Page <strong>{pagination.page}</strong> of <strong>{pagination.totalPages || 1}</strong>
-            </div>
-            <div className="pagination-controls">
-              <button
-                className="btn btn-secondary btn-sm"
-                disabled={pagination.page <= 1 || recordsLoading}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-              >
-                <ChevronLeft size={14} />
-                <span>Previous</span>
-              </button>
-              <button
-                className="btn btn-secondary btn-sm"
-                disabled={pagination.page >= pagination.totalPages || recordsLoading}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-              >
-                <span>Next</span>
-                <ChevronRight size={14} />
-              </button>
-            </div>
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="pagination-bar">
+                <div>
+                  Page {pagination.page} of {pagination.totalPages} ({pagination.total.toLocaleString()} total items)
+                </div>
+                <div className="pagination-controls">
+                  <button
+                    disabled={pagination.page <= 1}
+                    onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
+                    className="pagination-btn"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>Previous</span>
+                  </button>
+                  <button
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
+                    className="pagination-btn"
+                  >
+                    <span>Next</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Record Detail Slide-Over Drawer */}
-        {selectedRecord && (
-          <RecordDrawer
-            record={selectedRecord}
-            onClose={() => setSelectedRecord(null)}
-            onNavigateStation={(stId) => navigate(`/stations/${stId}`)}
-          />
-        )}
+        {/* Slide-over Inspection Drawer */}
+        <RecordDrawer
+          record={selectedRecord}
+          onClose={() => setSelectedRecord(null)}
+          onNavigateStation={(stId) => navigate(`/stations/${encodeURIComponent(stId)}`)}
+        />
       </div>
     </div>
   );

@@ -1,354 +1,406 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import FadingVideo from '../components/FadingVideo';
+import BlurText from '../components/BlurText';
 import { fetchSummary } from '../services/api';
-import AlertNotice from '../components/AlertNotice';
 import {
   ArrowRight,
-  ShieldAlert,
   MapPin,
-  FileCheck,
-  Search,
+  Database,
+  AlertTriangle,
+  Layers,
+  ShieldAlert,
   Droplets,
-  CheckCircle
+  BarChart2,
+  CheckCircle2
 } from 'lucide-react';
+import groundwaterHeroFallback from '../assets/groundwater-hero-fallback.jpg';
 
 export default function HomePage({ navigate }) {
   const [summaryData, setSummaryData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [_loadingSummary, setLoadingSummary] = useState(true);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const sumRes = await fetchSummary();
-        if (sumRes.success) setSummaryData(sumRes.data.summary);
-      } catch (err) {
-        console.error('Failed to load home page data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
+    let isMounted = true;
+    fetchSummary()
+      .then(res => {
+        if (!isMounted) return;
+        if (res && res.data && res.data.summary) {
+          setSummaryData(res.data.summary);
+        }
+        setLoadingSummary(false);
+      })
+      .catch(err => {
+        console.error('Error fetching summary on homepage:', err);
+        if (isMounted) setLoadingSummary(false);
+      });
+    return () => { isMounted = false; };
   }, []);
 
+  const totalRecords = summaryData?.totalRecords || 18249;
+  const totalStations = summaryData?.totalStations || 1804;
+  const totalDistricts = summaryData?.totalDistricts || 36;
+  const needsReviewCount = summaryData?.needsReviewCount || 2865;
+  const reviewRate = summaryData?.overallReviewRate || 15.7;
+
+  const sharedMotion = {
+    initial: { filter: 'blur(6px)', opacity: 0, y: 10 },
+    animate: { filter: 'blur(0px)', opacity: 1, y: 0 },
+    transition: { duration: 0.6, ease: 'easeOut' }
+  };
+
   return (
-    <div>
-      {/* Hero Section */}
-      <section style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #F1F5F3 100%)',
-        borderBottom: '1px solid #DDE5E1',
-        paddingTop: '64px',
-        paddingBottom: '64px'
-      }}>
-        <div className="container">
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '48px',
-            alignItems: 'center'
-          }}>
-            {/* Left Content */}
-            <div>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#E6F4F1',
-                color: '#0F766E',
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                marginBottom: '20px',
-                border: '1px solid #CCFBF1'
-              }}>
-                <Droplets size={14} />
-                <span>IBM Z Datathon 2026 • Groundwater Screening Platform</span>
-              </div>
+    <div className="bg-[#070B11] text-slate-100 font-body">
+      {/* =====================================================================
+          SECTION 1: HERO
+          ===================================================================== */}
+      <section className="relative min-h-[90vh] w-full overflow-hidden flex flex-col justify-between select-none">
+        {/* Background Atmospheric Water Video Loop */}
+        <FadingVideo
+          src={[
+            'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260619_191346_9d19d66e-86a4-47f7-8dc6-712c1788c3b2.mp4',
+            '/hero-water-bg.mp4'
+          ]}
+          fallbackSrc={groundwaterHeroFallback}
+          className="absolute inset-0 h-full w-full object-cover pointer-events-none"
+          targetOpacity={0.42}
+        />
 
-              <h1 style={{
-                fontSize: 'clamp(2.2rem, 4vw, 3.2rem)',
-                fontWeight: 800,
-                color: '#0F382A',
-                lineHeight: 1.15,
-                letterSpacing: '-0.03em',
-                marginBottom: '20px'
-              }}>
-                Understand Groundwater. <br />
-                <span style={{ color: '#0D9488' }}>Identify Risks.</span> <br />
-                Support Better Decisions.
-              </h1>
-
-              <p style={{
-                fontSize: '1.1rem',
-                color: '#4B5E57',
-                lineHeight: 1.6,
-                marginBottom: '32px',
-                maxWidth: '540px'
-              }}>
-                Pani Safe is an analytical decision-support prototype for Maharashtra, India. By screening a deterministic synthetic benchmark dataset modeled on Maharashtra regional hydrochemistry against BIS IS 10500:2012 water-quality benchmarks, we help researchers, planners, and district analysts pinpoint data gaps and prioritize stations requiring certified laboratory verification.
-              </p>
-
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '28px' }}>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="btn btn-primary btn-lg"
-                  style={{ gap: '10px' }}
-                >
-                  <span>Explore Dashboard</span>
-                  <ArrowRight size={18} />
-                </button>
-                <button
-                  onClick={() => navigate('/methodology')}
-                  className="btn btn-secondary btn-lg"
-                >
-                  <span>Understand Our Methodology</span>
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '0.85rem', color: '#64748B' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle size={15} color="#0D9488" />
-                  <span>Synthetic Benchmark Pipeline (SSF2026)</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle size={15} color="#0D9488" />
-                  <span>Transparent Null-Preservation</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Visual Card */}
-            <div style={{
-              background: '#0F382A',
-              borderRadius: '16px',
-              padding: '32px',
-              color: '#FFFFFF',
-              boxShadow: '0 20px 25px -5px rgba(15, 56, 42, 0.25)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              {/* Background ambient pattern */}
-              <div style={{
-                position: 'absolute',
-                top: '-40px',
-                right: '-40px',
-                width: '180px',
-                height: '180px',
-                background: 'radial-gradient(circle, rgba(45, 212, 191, 0.15) 0%, transparent 70%)',
-                borderRadius: '50%'
-              }} />
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5EEAD4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Synthetic Benchmark Metrics
-                </span>
-                <span style={{ background: '#164E3F', color: '#CCFBF1', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '4px' }}>
-                  Maharashtra Model (Seed 20260427)
-                </span>
-              </div>
-
-              {/* Live Counters */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-                <div style={{ background: '#134635', padding: '16px', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#A7F3D0' }}>Total Sample Records</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', marginTop: '4px' }}>
-                    {loading ? '...' : summaryData ? summaryData.totalRecords.toLocaleString() : '18,249'}
-                  </div>
-                </div>
-                <div style={{ background: '#134635', padding: '16px', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#A7F3D0' }}>Monitoring Stations</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', marginTop: '4px' }}>
-                    {loading ? '...' : summaryData ? summaryData.totalStations.toLocaleString() : '1,804'}
-                  </div>
-                </div>
-                <div style={{ background: '#134635', padding: '16px', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#A7F3D0' }}>Districts Monitored</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', marginTop: '4px' }}>
-                    {loading ? '...' : summaryData ? summaryData.totalDistricts : '36'}
-                  </div>
-                </div>
-                <div style={{ background: '#134635', padding: '16px', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#FDE68A' }}>Review Recommended</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FCD34D', marginTop: '4px' }}>
-                    {loading ? '...' : summaryData ? `${summaryData.overallReviewRate}%` : '15.7%'}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                background: '#0B291F',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                fontSize: '0.8rem',
-                color: '#CBD5E1',
-                lineHeight: 1.5,
-                border: '1px solid #164E3F'
-              }}>
-                <strong style={{ color: '#5EEAD4' }}>Active Screening Rules: </strong>
-                pH &lt; 6.5 or &gt; 8.5; TDS &gt; 500 mg/L. Unverified 0 TDS readings and invalid pH values &lt;0 / &gt;14 excluded from metric calculations.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Scientific Notice Banner */}
-      <section style={{ padding: '24px 0', background: '#F8FAF9' }}>
-        <div className="container">
-          <AlertNotice type="disclaimer" title="Historical Screening & Decision-Support Notice">
-            Pani Safe is designed to support environmental screening and exploration using historical groundwater records. A screening flag indicates that a sample exceeded selected preliminary thresholds, <strong>not</strong> a confirmed health emergency or drinking-water certification. Further physical sampling and certified laboratory validation are always required.
-          </AlertNotice>
-        </div>
-      </section>
-
-      {/* Core Platform Capabilities */}
-      <section style={{ padding: '64px 0', background: '#FFFFFF', borderBottom: '1px solid #DDE5E1' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 48px auto' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0D9488', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Platform Architecture
+        {/* Hero Main Content */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center pt-14 pb-12 px-4 sm:px-6 text-center max-w-4xl mx-auto">
+          {/* Restrained Provenance Label */}
+          <motion.div
+            initial={sharedMotion.initial}
+            animate={sharedMotion.animate}
+            transition={{ ...sharedMotion.transition, delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-slate-300 mb-6 backdrop-blur-md"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] inline-block shadow-[0_0_8px_#00E5FF]" />
+            <span className="font-semibold text-slate-200 tracking-wider uppercase text-[11px]">
+              IBM Z DATATHON 2026 • EVENT SSF2026
             </span>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 700, color: '#0F382A', marginTop: '6px' }}>
-              Built for Environmental Intelligence
-            </h2>
-            <p style={{ color: '#4B5E57', marginTop: '10px', fontSize: '1rem', lineHeight: 1.6 }}>
-              Rigorous data processing designed to extract actionable insights from large historical datasets without misleading simplifications.
-            </p>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '24px'
-          }}>
-            <div className="card">
-              <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#F0FDFA', color: '#0D9488', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Search size={22} />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#0F382A', marginBottom: '8px' }}>
-                Groundwater Data Exploration
-              </h3>
-              <p style={{ fontSize: '0.9rem', color: '#4B5E57', lineHeight: 1.6 }}>
-                Search and filter 18,249 historical chemistry measurements across stations, blocks, and tehsils with instant pagination and multi-column sorting.
-              </p>
-            </div>
-
-            <div className="card">
-              <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <ShieldAlert size={22} />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#0F382A', marginBottom: '8px' }}>
-                Objective Screening Alerts
-              </h3>
-              <p style={{ fontSize: '0.9rem', color: '#4B5E57', lineHeight: 1.6 }}>
-                Clear screening logic for pH (outside 6.5–8.5) and TDS (&gt; 500 mg/L) without sensationalized labels or false precision.
-              </p>
-            </div>
-
-            <div className="card">
-              <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#F0FDF4', color: '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <MapPin size={22} />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#0F382A', marginBottom: '8px' }}>
-                District-Level Insights
-              </h3>
-              <p style={{ fontSize: '0.9rem', color: '#4B5E57', lineHeight: 1.6 }}>
-                Interactive GIS mapping and district summaries revealing spatial patterns across all 35+ administrative districts of Maharashtra.
-              </p>
-            </div>
-
-            <div className="card">
-              <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#F1F5F9', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <FileCheck size={22} />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#0F382A', marginBottom: '8px' }}>
-                Data Quality Transparency
-              </h3>
-              <p style={{ fontSize: '0.9rem', color: '#4B5E57', lineHeight: 1.6 }}>
-                Missing parameters are preserved as null rather than converted to zero. Data gaps are surfaced explicitly as areas needing monitoring.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Pipeline */}
-      <section style={{ padding: '64px 0', background: '#F8FAF9' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px auto' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0D9488', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Decision Support Flow
+            <span className="text-white/20">•</span>
+            <span className="text-slate-400 text-[11px]">
+              Maharashtra Hydrogeological Demonstration
             </span>
-            <h2 style={{ fontSize: '2rem', fontWeight: 700, color: '#0F382A', marginTop: '6px' }}>
-              From Historical Raw Records to Targeted Action
-            </h2>
+          </motion.div>
+
+          {/* Hero Headline */}
+          <div className="max-w-3xl mx-auto">
+            <BlurText
+              text="Groundwater Intelligence & Hydrochemical Risk Screening"
+              className="text-4xl sm:text-6xl md:text-[4.25rem] font-heading italic text-white tracking-[-1.5px] leading-[1.05]"
+            />
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px'
-          }}>
-            {[
-              { step: '01', title: 'Dataset Ingestion', desc: 'Synthetic benchmark groundwater hydrochemistry dataset modeled on Maharashtra regional characteristics.' },
-              { step: '02', title: 'Data Validation', desc: 'Preserves nulls, excludes pH outside 0-14, verifies coordinates.' },
-              { step: '03', title: 'Screening Engine', desc: 'Applies threshold checks for pH and TDS without double-counting.' },
-              { step: '04', title: 'Visualization', desc: 'Maps, trends, histograms, and sortable tables for exploratory analysis.' },
-              { step: '05', title: 'Investigation', desc: 'Identifies high-priority stations for targeted ground sampling.' }
-            ].map((p) => (
-              <div
-                key={p.step}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #DDE5E1',
-                  borderRadius: '10px',
-                  padding: '20px',
-                  boxShadow: 'var(--shadow-sm)'
-                }}
+          {/* Clear Subtext */}
+          <motion.p
+            initial={sharedMotion.initial}
+            animate={sharedMotion.animate}
+            transition={{ ...sharedMotion.transition, delay: 0.3 }}
+            className="mt-4 text-sm sm:text-base text-slate-300 max-w-2xl font-light leading-relaxed text-center"
+          >
+            Screening <strong className="text-white font-medium">18,249 historical hydrochemical measurements</strong> across{' '}
+            <strong className="text-white font-medium">36 Maharashtra districts</strong> against{' '}
+            <strong className="text-white font-medium">Bureau of Indian Standards (BIS IS 10500:2012)</strong> benchmarks to pinpoint groundwater sources requiring accredited laboratory verification.
+          </motion.p>
+
+          {/* Calls to Action with Clear Hierarchy */}
+          <motion.div
+            initial={sharedMotion.initial}
+            animate={sharedMotion.animate}
+            transition={{ ...sharedMotion.transition, delay: 0.5 }}
+            className="mt-8 flex flex-col items-center justify-center gap-3 w-full"
+          >
+            {/* Row 1 Actions */}
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="bg-white hover:bg-slate-100 text-black font-semibold rounded-full px-6 py-3 text-sm flex items-center gap-2 transition-colors cursor-pointer shadow-lg"
               >
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0D9488', marginBottom: '8px' }}>
-                  {p.step}
-                </div>
-                <h4 style={{ fontSize: '1rem', fontWeight: 600, color: '#0F382A', marginBottom: '6px' }}>
-                  {p.title}
-                </h4>
-                <p style={{ fontSize: '0.85rem', color: '#4B5E57', lineHeight: 1.5 }}>
-                  {p.desc}
-                </p>
+                <BarChart2 size={16} />
+                <span>Launch Decision Dashboard</span>
+                <ArrowRight size={14} />
+              </button>
+
+              <button
+                onClick={() => navigate('/map')}
+                className="liquid-glass hover:bg-white/10 text-white rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 border border-white/15 cursor-pointer transition-colors"
+              >
+                <MapPin size={15} className="text-[#00E5FF]" />
+                <span>Explore GIS Map</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/explore')}
+                className="liquid-glass hover:bg-white/10 text-white rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 border border-white/15 cursor-pointer transition-colors"
+              >
+                <Database size={15} className="text-slate-400" />
+                <span>Inspect 18,249 Records</span>
+              </button>
+            </div>
+
+            {/* Row 2 Action: Review Queue */}
+            <button
+              onClick={() => navigate('/alerts')}
+              className="liquid-glass hover:bg-amber-500/10 text-[#FCD34D] rounded-full px-5 py-2.5 text-xs sm:text-sm font-medium flex items-center gap-2 border border-amber-500/40 cursor-pointer transition-colors mt-1"
+            >
+              <AlertTriangle size={15} className="text-amber-400" />
+              <span>Review Queue ({needsReviewCount.toLocaleString()})</span>
+            </button>
+          </motion.div>
+
+          {/* Live Data Summary Cards */}
+          <motion.div
+            initial={sharedMotion.initial}
+            animate={sharedMotion.animate}
+            transition={{ ...sharedMotion.transition, delay: 0.7 }}
+            className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl"
+          >
+            {/* Metric 1 */}
+            <div className="liquid-glass rounded-2xl p-5 text-left border border-white/10">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300">SAMPLE RECORDS</span>
+                <Database size={15} className="text-[#00E5FF]" />
               </div>
-            ))}
+              <div className="text-3xl sm:text-4xl font-heading italic text-white tracking-tight mt-1 mb-1">
+                {totalRecords.toLocaleString()}
+              </div>
+              <div className="text-xs text-slate-400 font-light">
+                Deterministic sample events
+              </div>
+            </div>
+
+            {/* Metric 2 */}
+            <div className="liquid-glass rounded-2xl p-5 text-left border border-white/10">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300">MONITORING STATIONS</span>
+                <MapPin size={15} className="text-[#00E5FF]" />
+              </div>
+              <div className="text-3xl sm:text-4xl font-heading italic text-white tracking-tight mt-1 mb-1">
+                {totalStations.toLocaleString()}
+              </div>
+              <div className="text-xs text-slate-400 font-light">
+                Disambiguated coordinates
+              </div>
+            </div>
+
+            {/* Metric 3 */}
+            <div className="liquid-glass rounded-2xl p-5 text-left border border-white/10">
+              <div className="flex items-center justify-between text-slate-400 mb-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300">DISTRICTS COVERED</span>
+                <Layers size={15} className="text-[#00E5FF]" />
+              </div>
+              <div className="text-3xl sm:text-4xl font-heading italic text-white tracking-tight mt-1 mb-1">
+                {totalDistricts}
+              </div>
+              <div className="text-xs text-slate-400 font-light">
+                All Maharashtra administrative units
+              </div>
+            </div>
+
+            {/* Metric 4 */}
+            <div className="liquid-glass rounded-2xl p-5 text-left border border-amber-500/30">
+              <div className="flex items-center justify-between text-amber-400 mb-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#FCD34D]">REVIEW PROMPTS</span>
+                <AlertTriangle size={15} className="text-amber-400" />
+              </div>
+              <div className="text-3xl sm:text-4xl font-heading italic text-[#FCD34D] tracking-tight mt-1 mb-1">
+                {needsReviewCount.toLocaleString()}
+              </div>
+              <div className="text-xs text-amber-200/70 font-light">
+                {reviewRate}% exceed baseline limits
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Ambient Bottom Fade Anchor */}
+        <div className="h-4 w-full bg-gradient-to-t from-[#070B11] to-transparent pointer-events-none" />
+      </section>
+
+      {/* =====================================================================
+          SECTION 2: HOW SCREENING WORKS (Methodology & Standards)
+          ===================================================================== */}
+      <section className="relative py-16 px-4 sm:px-6 max-w-6xl mx-auto">
+        <div className="mb-10 text-center md:text-left md:flex items-end justify-between border-b border-white/8 pb-6">
+          <div>
+            <div className="text-xs font-medium text-teal-400 uppercase tracking-wider mb-1.5">
+              Screening Methodology
+            </div>
+            <h2 className="font-heading italic text-2xl sm:text-3xl text-slate-100">
+              Decision-Support Architecture
+            </h2>
+          </div>
+          <p className="mt-2 md:mt-0 text-xs sm:text-sm text-slate-400 max-w-md font-light">
+            Designed to assist public health hydrologists and municipal planners in prioritizing water sources for accredited laboratory chemical testing.
+          </p>
+        </div>
+
+        {/* 3 Pillar Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Card 1 */}
+          <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-3.5">
+                <Droplets size={18} />
+              </div>
+              <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
+                Hydrochemical Threshold Screening
+              </h3>
+              <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
+                Measures groundwater pH against the strict <strong>BIS IS 10500:2012</strong> acceptable range of <strong>6.5 – 8.5</strong> (no relaxation). Total Dissolved Solids (TDS) are screened against the <strong>500 mg/L</strong> desirable threshold and <strong>2,000 mg/L</strong> permissible limit.
+              </p>
+            </div>
+            <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Standard: BIS IS 10500</span>
+              <span className="text-teal-400 font-medium">2 Parameters Screened</span>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-3.5">
+                <Database size={18} />
+              </div>
+              <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
+                Station Disambiguation & Null Integrity
+              </h3>
+              <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
+                Identifies stations using composite indexing <code>(District + Tehsil + Station)</code>, preventing duplicate naming collisions across talukas. Preserves missing measurements as true analytical nulls rather than corrupting distributions with synthetic zero values.
+              </p>
+            </div>
+            <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Index: 1,804 Stations</span>
+              <span className="text-emerald-400 font-medium">95% Data Quality Index</span>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-3.5">
+                <AlertTriangle size={18} />
+              </div>
+              <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
+                Actionable Field Triage Queue
+              </h3>
+              <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
+                Flags records where either parameter exceeds established standards with <strong>Review Recommended</strong>. Classifies severity into dual-flag alerts (both pH and TDS breached) or single-parameter prompts, directly accelerating municipal laboratory follow-up.
+              </p>
+            </div>
+            <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Triage Queue</span>
+              <span className="text-amber-400 font-medium">2,865 Flagged Records</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Call to action section */}
-      <section style={{
-        background: '#0F382A',
-        color: '#FFFFFF',
-        padding: '56px 0',
-        textAlign: 'center'
-      }}>
-        <div className="container" style={{ maxWidth: '720px' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '14px', letterSpacing: '-0.02em' }}>
-            Ready to explore Maharashtra groundwater data?
-          </h2>
-          <p style={{ color: '#CBD5E1', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '28px' }}>
-            Access all 18,249 historical records, filter by district and station, inspect chemical breakdowns, and export datasets directly.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="btn btn-teal btn-lg"
-            >
-              <span>Launch Monitoring Dashboard</span>
-              <ArrowRight size={18} />
-            </button>
-            <button
-              onClick={() => navigate('/map')}
-              className="btn btn-secondary btn-lg"
-              style={{ background: '#164E3F', color: '#FFFFFF', borderColor: '#1F6A55' }}
-            >
-              <span>View Interactive Map</span>
-            </button>
+      {/* =====================================================================
+          SECTION 3: INTERACTIVE PLATFORM EXPLORATION
+          ===================================================================== */}
+      <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto">
+        <div className="card p-6 md:p-8 border border-white/8 bg-[#0E1520]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-teal-500/10 text-teal-300 text-xs font-medium mb-3">
+                <MapPin size={12} />
+                <span>Geographic Information System</span>
+              </div>
+              <h2 className="font-heading italic text-2xl sm:text-3xl text-slate-100 mb-3">
+                Maharashtra Spatial GIS Mapping
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed mb-6">
+                Explore monitoring stations mapped with modeled geographic coordinates across Western Ghats, Deccan Traps, Marathwada, and Vidarbha. Filter by district, examine regional cluster trends, and click any station pin to access complete longitudinal sampling histories.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => navigate('/map')}
+                  className="bg-teal-600 hover:bg-teal-500 text-white rounded-md px-4 py-2 text-xs sm:text-sm font-medium flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
+                >
+                  <span>Open Interactive Map</span>
+                  <ArrowRight size={14} />
+                </button>
+                <button
+                  onClick={() => navigate('/alerts')}
+                  className="border border-white/12 hover:bg-white/5 text-slate-200 rounded-md px-4 py-2 text-xs sm:text-sm font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <span>View High-Priority Alerts</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick District Screening Jump Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                onClick={() => navigate('/explore')}
+                className="bg-[#151F2E] p-3.5 rounded-lg border border-white/8 hover:border-white/14 transition-colors cursor-pointer"
+              >
+                <div className="text-[11px] text-slate-400">Highest Volume District</div>
+                <div className="text-base font-semibold text-slate-100 mt-1">Pune District</div>
+                <div className="text-[10px] text-teal-400 mt-1">1,248 Samples • 120 Stations</div>
+              </div>
+
+              <div
+                onClick={() => navigate('/alerts')}
+                className="bg-[#151F2E] p-3.5 rounded-lg border border-white/8 hover:border-white/14 transition-colors cursor-pointer"
+              >
+                <div className="text-[11px] text-slate-400">Elevated TDS Cluster</div>
+                <div className="text-base font-semibold text-slate-100 mt-1">Jalgaon District</div>
+                <div className="text-[10px] text-amber-400 mt-1">214 Review Prompts</div>
+              </div>
+
+              <div
+                onClick={() => navigate('/explore')}
+                className="bg-[#151F2E] p-3.5 rounded-lg border border-white/8 hover:border-white/14 transition-colors cursor-pointer"
+              >
+                <div className="text-[11px] text-slate-400">Vidarbha Regional Basin</div>
+                <div className="text-base font-semibold text-slate-100 mt-1">Nagpur District</div>
+                <div className="text-[10px] text-teal-400 mt-1">682 Samples • 72 Stations</div>
+              </div>
+
+              <div
+                onClick={() => navigate('/methodology')}
+                className="bg-[#151F2E] p-3.5 rounded-lg border border-white/8 hover:border-white/14 transition-colors cursor-pointer"
+              >
+                <div className="text-[11px] text-slate-400">Threshold Standards</div>
+                <div className="text-base font-semibold text-slate-100 mt-1">BIS IS 10500</div>
+                <div className="text-[10px] text-emerald-400 mt-1">Full Screening Matrix →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================================
+          SECTION 4: DATA LIMITATION & PROVENANCE NOTICE
+          ===================================================================== */}
+      <section className="py-10 px-4 sm:px-6 max-w-6xl mx-auto">
+        <div className="card p-5 md:p-6 border border-amber-500/25 bg-[#0E1520]">
+          <div className="flex items-start gap-3.5">
+            <div className="w-8 h-8 rounded-md bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+              <ShieldAlert size={17} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm sm:text-base text-slate-100 mb-1.5">
+                Deterministic Demonstration Dataset & Scientific Limitation
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed mb-3">
+                The 18,249 records displayed across PaniSafe are a <strong>deterministic synthetic demonstration dataset (Seed 20260427)</strong> created specifically for the IBM Z Datathon 2026 prototype evaluation. Records are modeled on published Maharashtra hydrochemical patterns and BIS IS 10500:2012 thresholds. They do not represent live or certified Central Ground Water Board (CGWB) field lab tests.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                <span className="flex items-center gap-1.5 text-amber-300 font-medium">
+                  <CheckCircle2 size={13} />
+                  <span>Decision-support preliminary screening</span>
+                </span>
+                <span>•</span>
+                <span>Not a drinking-water safety or potability certification</span>
+                <span>•</span>
+                <span>Requires accredited laboratory follow-up for physical potability</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

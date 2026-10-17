@@ -18,7 +18,7 @@ export default function LeafletMap({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      // Center of Maharashtra
+      // Center coordinates of Maharashtra state
       const map = L.map(mapContainerRef.current, {
         center: [19.7515, 75.7139],
         zoom: 7,
@@ -27,11 +27,23 @@ export default function LeafletMap({
         scrollWheelZoom: true
       });
 
-      // Free standard OpenStreetMap tiles (no paid API key required)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
+      // Esri World Dark Gray Canvas tiles (Keyless, high-contrast, clean dark cartography)
+      const baseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+        maxZoom: 16
       }).addTo(map);
+
+      // Reference overlay for labels and district borders
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '',
+        maxZoom: 16,
+        opacity: 0.85
+      }).addTo(map);
+
+      // Error fallback if tiles cannot load
+      baseLayer.on('tileerror', () => {
+        console.warn('Map tile failed to load. Verifying network connection.');
+      });
 
       markersLayerRef.current = L.layerGroup().addTo(map);
       mapInstanceRef.current = map;
@@ -53,7 +65,7 @@ export default function LeafletMap({
 
     markersLayer.clearLayers();
 
-    // Limit visible markers to top 400 for smooth performance if unfiltered
+    // Limit visible markers to top 500 for smooth 60fps interaction
     const displayStations = stations.slice(0, 500);
 
     displayStations.forEach(st => {
@@ -61,23 +73,22 @@ export default function LeafletMap({
 
       const isFlagged = st.flaggedCount > 0 || st.needsReviewLatest;
       const markerColor = isFlagged ? '#D97706' : '#0D9488';
-      const borderColor = isFlagged ? '#92400E' : '#047857';
 
       const customIcon = L.divIcon({
         className: 'custom-leaflet-pin',
         html: `
           <div style="
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background-color: ${markerColor};
-            border: 2px solid ${borderColor};
-            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-            transition: transform 0.15s ease;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            cursor: pointer;
           "></div>
         `,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
       });
 
       const marker = L.marker([st.latitude, st.longitude], { icon: customIcon });
@@ -87,26 +98,28 @@ export default function LeafletMap({
       });
 
       const popupHtml = `
-        <div style="font-family: system-ui, sans-serif; padding: 2px; min-width: 180px;">
-          <div style="font-size: 11px; font-weight: 700; color: #0D9488; text-transform: uppercase;">
+        <div style="font-family: var(--font-body), sans-serif; padding: 4px; min-width: 210px; color: #F8FAFC;">
+          <div style="font-size: 11px; font-weight: 600; color: #14B8A6; text-transform: uppercase; letter-spacing: 0.06em;">
             ${st.district} District
           </div>
-          <div style="font-size: 14px; font-weight: 700; color: #0F382A; margin: 2px 0 6px 0;">
+          <div style="font-family: var(--font-body), sans-serif; font-weight: 600; font-size: 17px; color: #FFFFFF; margin: 3px 0 6px 0; letter-spacing: -0.3px; line-height: 1.2;">
             ${st.station}
           </div>
-          <div style="font-size: 12px; color: #4B5E57; margin-bottom: 8px;">
-            ${st.village ? `${st.village} • ` : ''}Samples: <strong>${st.recordCount || 1}</strong>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.75); margin-bottom: 10px;">
+            ${st.village ? `${st.village} • ` : ''}Sample Records: <strong>${st.recordCount || 1}</strong>
           </div>
           <div style="
-            background: ${isFlagged ? '#FEF3C7' : '#D1FAE5'};
-            color: ${isFlagged ? '#92400E' : '#065F46'};
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: ${isFlagged ? 'rgba(217, 119, 6, 0.15)' : 'rgba(13, 148, 136, 0.15)'};
+            border: 1px solid ${isFlagged ? 'rgba(217, 119, 6, 0.35)' : 'rgba(13, 148, 136, 0.35)'};
+            color: ${isFlagged ? '#FCD34D' : '#14B8A6'};
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            text-align: center;
           ">
-            ${isFlagged ? '● Threshold Exceeded' : '● Within Limits'}
+            ${isFlagged ? '● Screening Benchmark Exceeded' : '● Within Baseline Screening Limits'}
             ${st.latestPh !== null ? `<br>Latest pH: ${st.latestPh}` : ''}
             ${st.latestTds !== null ? `<br>Latest TDS: ${st.latestTds} mg/L` : ''}
           </div>
@@ -114,77 +127,84 @@ export default function LeafletMap({
             id="view-station-btn-${st.stationId}"
             style="
               width: 100%;
-              background: #0F382A;
+              background: #0D9488;
               color: #FFFFFF;
               border: none;
-              padding: 6px 10px;
-              border-radius: 4px;
-              font-size: 11px;
+              padding: 8px 14px;
+              border-radius: 6px;
+              font-size: 12px;
               font-weight: 600;
               cursor: pointer;
+              transition: all 0.2s ease;
             "
           >
-            View Station Profile →
+            Inspect Station History →
           </button>
         </div>
       `;
 
       marker.bindPopup(popupHtml);
 
+      // Attach button handler when popup opens
       marker.on('popupopen', () => {
-        const btn = document.getElementById(`view-station-btn-${st.stationId}`);
-        if (btn) {
-          btn.onclick = () => {
-            if (onViewStationProfile) {
-              onViewStationProfile(st.stationId);
-            }
-          };
-        }
+        setTimeout(() => {
+          const btn = document.getElementById(`view-station-btn-${st.stationId}`);
+          if (btn && onViewStationProfile) {
+            btn.onclick = () => onViewStationProfile(st.stationId);
+          }
+        }, 50);
       });
 
       markersLayer.addLayer(marker);
     });
 
+    // Center on selected station if provided
     if (selectedStationId) {
-      const match = stations.find(s => s.stationId === selectedStationId);
-      if (match && match.latitude && match.longitude) {
-        map.setView([match.latitude, match.longitude], 11);
+      const target = stations.find(s => s.stationId === selectedStationId);
+      if (target && target.latitude && target.longitude) {
+        map.setView([target.latitude, target.longitude], 11, { animate: true });
       }
     }
   }, [stations, selectedStationId, onSelectStation, onViewStationProfile]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height, borderRadius: '10px', overflow: 'hidden' }}>
-      <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+    <div style={{
+      position: 'relative',
+      height,
+      width: '100%',
+      borderRadius: '20px',
+      overflow: 'hidden',
+      border: '1px solid rgba(255, 255, 255, 0.16)',
+      boxShadow: '0 16px 48px rgba(0, 0, 0, 0.8)'
+    }}>
+      <div ref={mapContainerRef} style={{ height: '100%', width: '100%', background: '#0E141F' }} />
 
       {/* Map Legend Overlay */}
-      <div style={{
+      <div className="card p-3.5" style={{
         position: 'absolute',
-        bottom: '20px',
-        left: '20px',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(4px)',
-        padding: '10px 14px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        fontSize: '0.75rem',
+        bottom: '16px',
+        left: '16px',
         zIndex: 500,
-        border: '1px solid #DDE5E1',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '6px'
+        fontSize: '0.75rem',
+        color: '#E2E8F0',
+        maxWidth: '280px',
+        borderRadius: '10px'
       }}>
-        <strong style={{ color: '#0F382A', marginBottom: '2px' }}>Screening Classification</strong>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#D97706' }} />
-          <span>Screening Threshold Exceeded</span>
+        <div style={{ fontWeight: 600, fontSize: '0.8rem', color: '#F8FAFC', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Screening Legend
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#0D9488' }} />
-          <span>Within Preliminary Limits</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#0D9488' }} />
+            <span>Within Screening Limits</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#D97706' }} />
+            <span>Review Recommended (&gt;500 mg/L TDS or pH &lt;6.5 / &gt;8.5)</span>
+          </div>
         </div>
-        <div style={{ color: '#7E938B', fontSize: '0.7rem', marginTop: '4px', borderTop: '1px solid #EBF0ED', paddingTop: '4px' }}>
-          OpenStreetMap • Free Leaflet Tiles
+        <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.45)', lineHeight: 1.3 }}>
+          * Station coordinates are deterministically modeled demonstration coordinates across Maharashtra districts.
         </div>
       </div>
     </div>

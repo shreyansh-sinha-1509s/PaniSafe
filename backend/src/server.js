@@ -53,13 +53,20 @@ app.use('/api/auth', authRoutes);
 
 // Serve frontend build if present
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
-app.use(express.static(frontendDistPath));
+app.use(express.static(frontendDistPath, {
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  }
+}));
 
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }
   const indexPath = path.join(frontendDistPath, 'index.html');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(indexPath, (err) => {
     if (err) {
       // In development mode when frontend is run via Vite dev server

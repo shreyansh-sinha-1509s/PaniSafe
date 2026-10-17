@@ -15,10 +15,10 @@ export default function LoginPage({ navigate }) {
     return (
       <div className="page-container">
         <div className="container" style={{ maxWidth: '500px', textAlign: 'center', paddingTop: '40px' }}>
-          <div className="card">
-            <UserCheck size={48} color="#0D9488" style={{ margin: '0 auto 16px auto' }} />
-            <h2 style={{ fontSize: '1.4rem', color: '#0F382A', marginBottom: '8px' }}>Already Authenticated</h2>
-            <p style={{ fontSize: '0.9rem', color: '#4B5E57', marginBottom: '24px' }}>
+          <div className="card rounded-2xl" style={{ padding: '36px' }}>
+            <UserCheck size={44} color="#14B8A6" style={{ margin: '0 auto 16px auto' }} />
+            <h2 className="font-body font-semibold text-xl text-white mb-2">Already Authenticated</h2>
+            <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '24px' }}>
               You are currently signed in to the Pani Safe Environmental Analytics portal.
             </p>
             <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ width: '100%' }}>
@@ -65,30 +65,30 @@ export default function LoginPage({ navigate }) {
           <div style={{ display: 'inline-block', marginBottom: '12px' }}>
             <Logo size={40} showText={false} />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0F382A' }}>
+          <h1 className="page-title" style={{ fontSize: '2.4rem' }}>
             Sign In to Pani Safe
           </h1>
-          <p style={{ fontSize: '0.9rem', color: '#64748B', marginTop: '4px' }}>
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.65)', marginTop: '4px' }}>
             Access saved station bookmarks and analyst review logs.
           </p>
         </div>
 
         {/* Public Access Notice */}
         <div style={{
-          background: '#F0FDFA',
-          border: '1px solid #CCFBF1',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          marginBottom: '20px',
+          background: 'rgba(13, 148, 136, 0.08)',
+          border: '1px solid rgba(13, 148, 136, 0.25)',
+          borderRadius: '12px',
+          padding: '14px 18px',
+          marginBottom: '24px',
           fontSize: '0.825rem',
-          color: '#0F766E',
-          lineHeight: 1.4
+          color: '#E2E8F0',
+          lineHeight: 1.5
         }}>
-          <strong>Open Data Note: </strong>
+          <strong style={{ color: '#14B8A6' }}>Open Data Note: </strong>
           Authentication is <em>optional</em>. All 18,249 historical records, the interactive map, and the dashboard are 100% publicly accessible without logging in.
         </div>
 
-        <div className="card" style={{ padding: '32px' }}>
+        <div className="card rounded-2xl" style={{ padding: '36px' }}>
           {error && (
             <AlertNotice type="danger" title="Authentication Error">
               {error}
@@ -96,26 +96,24 @@ export default function LoginPage({ navigate }) {
           )}
 
           {/* Quick Demo Login Option */}
-          <div style={{
-            background: '#F8FAF9',
-            border: '1px dashed #0D9488',
-            borderRadius: '8px',
-            padding: '16px',
+          <div className="card-subtle rounded-xl p-5" style={{
             marginBottom: '24px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0D9488', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#14B8A6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               One-Click Evaluator Access
             </div>
-            <div style={{ fontSize: '0.85rem', color: '#4B5E57', margin: '6px 0 12px 0' }}>
+            <div style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.75)', margin: '8px 0 14px 0', lineHeight: 1.5 }}>
               Test platform capabilities using the pre-seeded Demo Analyst account:
               <br />
-              <code style={{ fontSize: '0.75rem', color: '#0F382A' }}>analyst.demo@panisafe.in</code>
+              <code style={{ fontSize: '0.8rem', color: '#14B8A6', background: 'rgba(13, 148, 136, 0.12)', padding: '2px 8px', borderRadius: '4px' }}>
+                analyst.demo@panisafe.in
+              </code>
             </div>
             <button
               onClick={handleDemoSignIn}
               disabled={loading}
-              className="btn btn-teal btn-sm"
+              className="btn btn-secondary btn-sm"
               style={{ width: '100%' }}
             >
               <UserCheck size={14} />
@@ -123,10 +121,10 @@ export default function LoginPage({ navigate }) {
             </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: '12px' }}>
-            <div style={{ flex: 1, height: '1px', background: '#DDE5E1' }} />
-            <span style={{ fontSize: '0.75rem', color: '#7E938B', textTransform: 'uppercase' }}>or sign in with credentials</span>
-            <div style={{ flex: 1, height: '1px', background: '#DDE5E1' }} />
+          <div style={{ display: 'flex', alignItems: 'center', margin: '24px 0', gap: '12px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
+            <span style={{ fontSize: '0.725rem', color: 'rgba(255, 255, 255, 0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>or sign in with credentials</span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -135,30 +133,30 @@ export default function LoginPage({ navigate }) {
               <div style={{ position: 'relative' }}>
                 <input
                   type="email"
-                  className="form-input"
-                  style={{ paddingLeft: '34px' }}
+                  className="input"
+                  style={{ paddingLeft: '36px' }}
                   placeholder="analyst.demo@panisafe.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <Mail size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '12px' }} />
+                <Mail size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
               </div>
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '24px' }}>
               <label className="form-label">Password</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type="password"
-                  className="form-input"
-                  style={{ paddingLeft: '34px' }}
+                  className="input"
+                  style={{ paddingLeft: '36px' }}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <Key size={16} color="#7E938B" style={{ position: 'absolute', left: '10px', top: '12px' }} />
+                <Key size={16} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
               </div>
             </div>
 
@@ -166,18 +164,18 @@ export default function LoginPage({ navigate }) {
               type="submit"
               className="btn btn-primary"
               disabled={loading}
-              style={{ width: '100%', marginTop: '8px' }}
+              style={{ width: '100%' }}
             >
               {loading ? <span>Verifying...</span> : <span>Sign In to Account</span>}
             </button>
           </form>
 
-          <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: '#64748B' }}>
+          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.55)' }}>
             Don't have an analyst account yet?{' '}
             <a
               href="#/register"
               onClick={(e) => { e.preventDefault(); navigate('/register'); }}
-              style={{ color: '#0D9488', fontWeight: 600 }}
+              style={{ color: '#14B8A6', fontWeight: 600 }}
             >
               Register here
             </a>
