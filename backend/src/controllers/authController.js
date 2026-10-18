@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { verifyCredentials } from './adminAuthController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -118,6 +119,57 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
+    // 1. Authenticate Administrator or Judge credentials
+    try {
+      const adminVerification = await verifyCredentials(email, password);
+      if (adminVerification.valid) {
+        const isJudge = adminVerification.accountType === 'judge';
+        const token = jwt.sign(
+          {
+            id: isJudge ? 'admin_judge' : 'admin_root',
+            email: adminVerification.email,
+            role: 'admin',
+            accountType: adminVerification.accountType,
+            fullName: isJudge ? 'Datathon Judge' : 'Administrator'
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        // Also set HTTP-only cookie if cookie-parser is active
+        try {
+          res.cookie('panisafe_admin_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000
+          });
+        } catch {}
+
+        return res.json({
+          success: true,
+          message: `${isJudge ? 'Judge' : 'Administrator'} authenticated successfully.`,
+          token,
+          admin: {
+            email: adminVerification.email,
+            role: 'admin',
+            accountType: adminVerification.accountType,
+            fullName: isJudge ? 'Datathon Judge' : 'Administrator'
+          },
+          user: {
+            id: isJudge ? 'admin_judge' : 'admin_root',
+            email: adminVerification.email,
+            role: 'admin',
+            accountType: adminVerification.accountType,
+            fullName: isJudge ? 'Datathon Judge' : 'Administrator'
+          }
+        });
+      }
+    } catch (authErr) {
+      console.warn('[AUTH CONTROLLER] Admin credential check failed:', authErr.message);
+    }
+
+    // 2. Check local registered users
     const users = getUsers();
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
     if (!user) {

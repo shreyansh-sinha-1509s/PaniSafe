@@ -272,10 +272,12 @@ export default function AdminDashboardPage({ navigate }) {
               <span>MongoDB Atlas Persistent Inquiries</span>
             </div>
             <h1 style={{ fontSize: '1.85rem', fontWeight: 700, color: '#0F382A', margin: 0 }}>
-              Admin Inquiries Dashboard
+              {user?.role === 'judge' || user?.accountType === 'judge' || user?.email === 'judge@panisafe.in'
+                ? 'Judge Evaluation — Inquiries Portal'
+                : 'Admin Inquiries Dashboard'}
             </h1>
             <p style={{ fontSize: '0.9rem', color: '#64748B', marginTop: '4px', margin: 0 }}>
-              Logged in as <strong style={{ color: '#0F766E' }}>{user?.email || 'admin@panisafe.in'}</strong> • Authenticated Session
+              Logged in as <strong style={{ color: '#0F766E' }}>{user?.email || 'admin@panisafe.in'}</strong> • {user?.role === 'judge' || user?.accountType === 'judge' || user?.email === 'judge@panisafe.in' ? 'Judge Evaluation Session' : 'Administrator Session'}
             </p>
           </div>
 

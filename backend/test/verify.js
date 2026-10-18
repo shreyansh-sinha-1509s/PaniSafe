@@ -6,8 +6,11 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'node:url';
 
+import cookieParser from 'cookie-parser';
 import apiRoutes from '../src/routes/apiRoutes.js';
 import authRoutes from '../src/routes/authRoutes.js';
+import adminRoutes from '../src/routes/adminRoutes.js';
+import inquiryRoutes from '../src/routes/inquiryRoutes.js';
 import { dataService } from '../src/services/dataService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,10 +23,13 @@ process.env.PORT = '5099';
 // Setup Express app instance for test
 const app = express();
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/inquiries', inquiryRoutes);
 
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendDistPath));
@@ -241,7 +247,96 @@ test('Pani Safe Test Suite: Data Engine & REST API Verification', async (t) => {
     assert.strictEqual(meRes.json.user.email, 'analyst.demo@panisafe.in');
   });
 
-  await t.test('17. GET / serves production frontend HTML', async () => {
+  await t.test('17. POST /api/admin/login authenticates Judge account', async () => {
+    const res = await makeRequest('/api/admin/login', {
+      method: 'POST',
+      body: {
+        email: 'judge@panisafe.in',
+        password: 'judge@159'
+      }
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.json.success, true);
+    assert.ok(res.json.token);
+    assert.strictEqual(res.json.admin.email, 'judge@panisafe.in');
+    assert.strictEqual(res.json.admin.role, 'judge');
+    assert.strictEqual(res.json.admin.accountType, 'judge');
+  });
+
+  await t.test('18. POST /api/admin/login authenticates Admin account', async () => {
+    const res = await makeRequest('/api/admin/login', {
+      method: 'POST',
+      body: {
+        email: 'admin@panisafe.in',
+        password: 'admin@159'
+      }
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.json.success, true);
+    assert.ok(res.json.token);
+    assert.strictEqual(res.json.admin.email, 'admin@panisafe.in');
+    assert.strictEqual(res.json.admin.role, 'admin');
+    assert.strictEqual(res.json.admin.accountType, 'primary_admin');
+  });
+
+  await t.test('19. POST /api/admin/login rejects invalid credentials', async () => {
+    const res = await makeRequest('/api/admin/login', {
+      method: 'POST',
+      body: {
+        email: 'admin@panisafe.in',
+        password: 'wrong_password_123'
+      }
+    });
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(res.json.success, false);
+  });
+
+  await t.test('20. POST /api/auth/login authenticates Judge account', async () => {
+    const res = await makeRequest('/api/auth/login', {
+      method: 'POST',
+      body: {
+        email: 'judge@panisafe.in',
+        password: 'judge@159'
+      }
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.json.success, true);
+    assert.ok(res.json.token);
+    assert.strictEqual(res.json.user.email, 'judge@panisafe.in');
+  });
+
+  await t.test('21. POST /api/auth/login authenticates Admin account', async () => {
+    const res = await makeRequest('/api/auth/login', {
+      method: 'POST',
+      body: {
+        email: 'admin@panisafe.in',
+        password: 'admin@159'
+      }
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.json.success, true);
+    assert.ok(res.json.token);
+    assert.strictEqual(res.json.user.email, 'admin@panisafe.in');
+  });
+
+  await t.test('22. GET /api/admin/inquiries retrieves inquiries without crashing', async () => {
+    const loginRes = await makeRequest('/api/admin/login', {
+      method: 'POST',
+      body: {
+        email: 'judge@panisafe.in',
+        password: 'judge@159'
+      }
+    });
+    const token = loginRes.json.token;
+    const inqRes = await makeRequest('/api/admin/inquiries', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    assert.strictEqual(inqRes.status, 200);
+    assert.strictEqual(inqRes.json.success, true);
+    assert.ok(Array.isArray(inqRes.json.data));
+  });
+
+  await t.test('23. GET / serves production frontend HTML', async () => {
     const res = await makeRequest('/');
     assert.strictEqual(res.status, 200);
     assert.ok(res.body.includes('<div id="root">') || res.body.includes('<!DOCTYPE html>'));
