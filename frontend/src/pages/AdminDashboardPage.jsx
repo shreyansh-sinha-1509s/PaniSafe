@@ -7,6 +7,7 @@ import {
   recordAdminInquiryReply
 } from '../services/api';
 import AlertNotice from '../components/AlertNotice';
+import MetricCard from '../components/MetricCard';
 import {
   ShieldAlert,
   Search,
@@ -15,7 +16,6 @@ import {
   LogOut,
   Mail,
   MapPin,
-  Calendar,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -26,9 +26,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Database,
-  User,
-  FileText,
-  Tag
+  Activity
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -209,7 +207,7 @@ export default function AdminDashboardPage({ navigate }) {
     return (
       <div className="page-container" style={{ textAlign: 'center', paddingTop: '80px' }}>
         <div className="spinner" style={{ margin: '0 auto 16px auto' }} />
-        <p style={{ color: '#64748B' }}>Verifying Administrator Credentials...</p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Verifying Administrator Credentials...</p>
       </div>
     );
   }
@@ -223,8 +221,9 @@ export default function AdminDashboardPage({ navigate }) {
               width: '56px',
               height: '56px',
               borderRadius: '50%',
-              background: '#FEE2E2',
-              color: '#DC2626',
+              background: 'rgba(220, 38, 38, 0.12)',
+              border: '1px solid rgba(220, 38, 38, 0.25)',
+              color: '#F87171',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -232,10 +231,10 @@ export default function AdminDashboardPage({ navigate }) {
             }}>
               <ShieldAlert size={30} />
             </div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#0F382A', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '8px' }}>
               Administrator Authentication Required
             </h2>
-            <p style={{ fontSize: '0.9rem', color: '#64748B', marginBottom: '24px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '24px', lineHeight: 1.5 }}>
               The inquiries management portal is strictly restricted to authenticated administrators. Unauthenticated access is denied on both the client and server.
             </p>
             <button
@@ -254,48 +253,38 @@ export default function AdminDashboardPage({ navigate }) {
 
   return (
     <div className="page-container">
-      <div className="container" style={{ maxWidth: '1200px' }}>
+      <div className="container">
         {/* Top Header Bar */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '16px',
-          marginBottom: '24px',
-          paddingBottom: '20px',
-          borderBottom: '1px solid #E2E8F0'
-        }}>
+        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#0D9488', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '6px' }}>
-              <Database size={16} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#14B8A6', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+              <Database size={15} />
               <span>MongoDB Atlas Persistent Inquiries</span>
             </div>
-            <h1 style={{ fontSize: '1.85rem', fontWeight: 700, color: '#0F382A', margin: 0 }}>
+            <h1 className="page-title">
               {user?.role === 'judge' || user?.accountType === 'judge' || user?.email === 'judge@panisafe.in'
                 ? 'Judge Evaluation — Inquiries Portal'
                 : 'Admin Inquiries Dashboard'}
             </h1>
-            <p style={{ fontSize: '0.9rem', color: '#64748B', marginTop: '4px', margin: 0 }}>
-              Logged in as <strong style={{ color: '#0F766E' }}>{user?.email || 'admin@panisafe.in'}</strong> • {user?.role === 'judge' || user?.accountType === 'judge' || user?.email === 'judge@panisafe.in' ? 'Judge Evaluation Session' : 'Administrator Session'}
+            <p className="page-subtitle">
+              Logged in as <strong style={{ color: '#14B8A6' }}>{user?.email || 'admin@panisafe.in'}</strong> • {user?.role === 'judge' || user?.accountType === 'judge' || user?.email === 'judge@panisafe.in' ? 'Judge Evaluation Session' : 'Administrator Session'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button
               onClick={() => loadInquiries(pagination.page)}
               className="btn btn-secondary btn-sm"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-              title="Refresh database records"
               disabled={loading}
+              title="Refresh database records"
             >
-              <RefreshCw size={14} className={loading ? 'spinner' : ''} />
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
               <span>Refresh</span>
             </button>
             <button
               onClick={logout}
               className="btn btn-secondary btn-sm"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#DC2626' }}
+              style={{ color: '#F87171', borderColor: 'rgba(239, 68, 68, 0.3)' }}
               title="Sign out of administrative session"
             >
               <LogOut size={14} />
@@ -305,158 +294,123 @@ export default function AdminDashboardPage({ navigate }) {
         </div>
 
         {/* KPI Metrics Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '16px',
-          marginBottom: '24px'
-        }}>
-          <div className="card" style={{ padding: '20px' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>
-              Total Inquiries
-            </div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0F382A', marginTop: '6px' }}>
-              {counts.total}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#0D9488', marginTop: '4px' }}>
-              Persistent in MongoDB
-            </div>
-          </div>
-
-          <div className="card" style={{ padding: '20px', borderLeft: '4px solid #EAB308' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#854D0E', textTransform: 'uppercase' }}>
-              New Inquiries
-            </div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#A16207', marginTop: '6px' }}>
-              {counts.new}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
-              Pending triage / review
-            </div>
-          </div>
-
-          <div className="card" style={{ padding: '20px', borderLeft: '4px solid #3B82F6' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1E40AF', textTransform: 'uppercase' }}>
-              In Progress
-            </div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#1D4ED8', marginTop: '6px' }}>
-              {counts.inProgress}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
-              Under active investigation
-            </div>
-          </div>
-
-          <div className="card" style={{ padding: '20px', borderLeft: '4px solid #10B981' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#065F46', textTransform: 'uppercase' }}>
-              Resolved
-            </div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#047857', marginTop: '6px' }}>
-              {counts.resolved}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
-              Reviewed & reply saved
-            </div>
-          </div>
+        <div className="metrics-grid">
+          <MetricCard
+            title="Total Inquiries"
+            value={counts.total}
+            subtext="Persistent in MongoDB"
+            icon={Database}
+            accent="#0D9488"
+          />
+          <MetricCard
+            title="New Inquiries"
+            value={counts.new}
+            subtext="Pending triage / review"
+            icon={Clock}
+            accent="#D97706"
+          />
+          <MetricCard
+            title="In Progress"
+            value={counts.inProgress}
+            subtext="Under active investigation"
+            icon={Activity}
+            accent="#38BDF8"
+          />
+          <MetricCard
+            title="Resolved"
+            value={counts.resolved}
+            subtext="Reviewed & reply saved"
+            icon={CheckCircle2}
+            accent="#10B981"
+          />
         </div>
 
         {/* Search & Filter Toolbar */}
-        <div className="card" style={{ padding: '20px', marginBottom: '24px' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '14px',
-            alignItems: 'flex-end'
-          }}>
-            {/* Search */}
-            <div>
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Search Keywords</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  className="form-input"
-                  style={{ paddingLeft: '34px', fontSize: '0.85rem' }}
-                  placeholder="ID, name, email, subject, text..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && loadInquiries(1)}
-                />
-                <Search size={15} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '10px' }} />
-              </div>
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Status</label>
-              <select
-                className="form-select"
-                style={{ fontSize: '0.85rem' }}
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-              >
-                {STATUSES.map(s => (
-                  <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Category</label>
-              <select
-                className="form-select"
-                style={{ fontSize: '0.85rem' }}
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Date Range: Start */}
-            <div>
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>From Date</label>
+        <div className="filter-bar">
+          {/* Search */}
+          <div className="filter-group" style={{ flex: 2, minWidth: '220px' }}>
+            <label className="filter-label">Search Keywords</label>
+            <div style={{ position: 'relative' }}>
               <input
-                type="date"
-                className="form-input"
-                style={{ fontSize: '0.85rem' }}
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                type="text"
+                className="filter-control"
+                style={{ width: '100%', paddingLeft: '34px' }}
+                placeholder="ID, name, email, subject, text..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && loadInquiries(1)}
               />
+              <Search size={15} color="rgba(255, 255, 255, 0.4)" style={{ position: 'absolute', left: '10px', top: '10px' }} />
             </div>
+          </div>
 
-            {/* Date Range: End */}
-            <div>
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>To Date</label>
-              <input
-                type="date"
-                className="form-input"
-                style={{ fontSize: '0.85rem' }}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
+          {/* Status Filter */}
+          <div className="filter-group" style={{ minWidth: '140px' }}>
+            <label className="filter-label">Status</label>
+            <select
+              className="filter-control"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+            >
+              {STATUSES.map(s => (
+                <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>
+              ))}
+            </select>
+          </div>
 
-            {/* Filter Actions */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => loadInquiries(1)}
-                className="btn btn-primary btn-sm"
-                style={{ flex: 1, gap: '6px' }}
-              >
-                <Filter size={14} />
-                <span>Apply</span>
-              </button>
-              <button
-                onClick={handleResetFilters}
-                className="btn btn-secondary btn-sm"
-                title="Reset filters"
-              >
-                <span>Reset</span>
-              </button>
-            </div>
+          {/* Category Filter */}
+          <div className="filter-group" style={{ minWidth: '150px' }}>
+            <label className="filter-label">Category</label>
+            <select
+              className="filter-control"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {CATEGORIES.map(c => (
+                <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date Range: Start */}
+          <div className="filter-group" style={{ minWidth: '140px' }}>
+            <label className="filter-label">From Date</label>
+            <input
+              type="date"
+              className="filter-control"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+
+          {/* Date Range: End */}
+          <div className="filter-group" style={{ minWidth: '140px' }}>
+            <label className="filter-label">To Date</label>
+            <input
+              type="date"
+              className="filter-control"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+
+          {/* Filter Actions */}
+          <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-end', paddingTop: '8px' }}>
+            <button
+              onClick={() => loadInquiries(1)}
+              className="btn btn-primary btn-sm"
+              style={{ gap: '6px' }}
+            >
+              <Filter size={14} />
+              <span>Apply</span>
+            </button>
+            <button
+              onClick={handleResetFilters}
+              className="btn btn-secondary btn-sm"
+              title="Reset filters"
+            >
+              <span>Reset</span>
+            </button>
           </div>
         </div>
 
@@ -466,7 +420,7 @@ export default function AdminDashboardPage({ navigate }) {
             <AlertNotice type="danger" title="Database Access Notice">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span>{error}</span>
-                <span style={{ fontSize: '0.8rem', color: '#B91C1C' }}>
+                <span style={{ fontSize: '0.8rem', color: '#FCA5A5' }}>
                   If MongoDB Atlas is not yet configured, verify that MONGODB_URI and MONGODB_DB_NAME are set in your deployment environment variables.
                 </span>
               </div>
@@ -475,19 +429,19 @@ export default function AdminDashboardPage({ navigate }) {
         )}
 
         {/* Inquiries Table Card */}
-        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+        <div className="table-container" style={{ marginBottom: '24px' }}>
           <div style={{
             padding: '16px 20px',
-            borderBottom: '1px solid #E2E8F0',
+            borderBottom: '1px solid var(--color-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: '#F8FAF9'
+            background: 'rgba(255, 255, 255, 0.02)'
           }}>
-            <div style={{ fontWeight: 700, color: '#0F382A', fontSize: '0.95rem' }}>
+            <div style={{ fontWeight: 600, color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
               Inquiries Records ({pagination.total})
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#64748B' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
               Page {pagination.page} of {pagination.totalPages}
             </div>
           </div>
@@ -495,114 +449,101 @@ export default function AdminDashboardPage({ navigate }) {
           {loading ? (
             <div style={{ padding: '48px', textAlign: 'center' }}>
               <div className="spinner" style={{ margin: '0 auto 12px auto' }} />
-              <p style={{ color: '#64748B', fontSize: '0.9rem' }}>Querying MongoDB Atlas collection...</p>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Querying MongoDB Atlas collection...</p>
             </div>
           ) : inquiries.length === 0 ? (
             <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-              <MessageSquare size={40} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
-              <div style={{ fontWeight: 600, color: '#334155', fontSize: '1rem' }}>No Inquiries Found</div>
-              <p style={{ color: '#64748B', fontSize: '0.85rem', maxWidth: '400px', margin: '6px auto 0 auto' }}>
-                {search || selectedCategory !== 'All' || selectedStatus !== 'All'
+              <MessageSquare size={40} color="var(--color-text-muted)" style={{ margin: '0 auto 12px auto' }} />
+              <div style={{ fontWeight: 600, color: 'var(--color-text-main)', fontSize: '1rem' }}>No Inquiries Found</div>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', maxWidth: '400px', margin: '6px auto 0 auto' }}>
+                {search || selectedCategory !== 'All' || selectedStatus !== 'All' || startDate || endDate
                   ? 'No records match your selected search or filter criteria.'
-                  : 'No customer inquiries have been submitted yet.'}
+                  : 'No inquiries have been recorded yet.'}
               </p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+              <table className="data-table" style={{ width: '100%', minWidth: '780px' }}>
                 <thead>
-                  <tr style={{ background: '#F1F5F9', borderBottom: '1px solid #E2E8F0', color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Tracking ID & Date</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Submitter</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Category & Location</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Subject</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Status</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+                  <tr>
+                    <th style={{ width: '190px' }}>Tracking ID & Date</th>
+                    <th style={{ width: '200px' }}>Submitter</th>
+                    <th style={{ width: '170px' }}>Category & Location</th>
+                    <th>Subject</th>
+                    <th style={{ width: '120px' }}>Status</th>
+                    <th style={{ width: '100px', textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {inquiries.map((inq) => {
-                    const statusColor =
-                      inq.status === 'Resolved' ? { bg: '#DCFCE7', text: '#166534', border: '#BBF7D0' } :
-                      inq.status === 'In Progress' ? { bg: '#DBEAFE', text: '#1E40AF', border: '#BFDBFE' } :
-                      { bg: '#FEF3C7', text: '#92400E', border: '#FDE68A' };
-
                     return (
-                      <tr
-                        key={inq.inquiryId || inq._id}
-                        style={{ borderBottom: '1px solid #E2E8F0', transition: 'background 0.15s ease' }}
-                        onMouseOver={(e) => e.currentTarget.style.background = '#F8FAFC'}
-                        onMouseOut={(e) => e.currentTarget.style.background = '#FFFFFF'}
-                      >
-                        <td style={{ padding: '14px 16px' }}>
-                          <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F766E' }}>
+                      <tr key={inq.inquiryId || inq._id}>
+                        <td>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: '#14B8A6', fontSize: '0.85rem' }}>
                             {inq.inquiryId}
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '2px' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
                             {inq.createdAt ? new Date(inq.createdAt).toLocaleDateString('en-IN') : 'N/A'}
                           </div>
                         </td>
 
-                        <td style={{ padding: '14px 16px' }}>
-                          <div style={{ fontWeight: 600, color: '#0F382A' }}>{inq.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#64748B' }}>{inq.email}</div>
+                        <td>
+                          <div style={{ fontWeight: 500, color: 'var(--color-text-main)' }}>{inq.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{inq.email}</div>
                         </td>
 
-                        <td style={{ padding: '14px 16px' }}>
-                          <span style={{
-                            display: 'inline-block',
-                            background: '#F1F5F9',
-                            color: '#334155',
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: 500
-                          }}>
+                        <td>
+                          <span className="badge badge-neutral">
                             {inq.category}
                           </span>
                           {inq.location && (
-                            <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <MapPin size={12} />
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <MapPin size={12} className="shrink-0 text-slate-400" />
                               <span>{inq.location}</span>
                             </div>
                           )}
                         </td>
 
-                        <td style={{ padding: '14px 16px', maxWidth: '280px' }}>
-                          <div style={{ fontWeight: 600, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <td style={{ maxWidth: '320px' }}>
+                          <div style={{ fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '3px', wordBreak: 'break-word', lineHeight: 1.4 }}>
                             {inq.subject}
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                          <div style={{ fontSize: '0.775rem', color: 'var(--color-text-secondary)', wordBreak: 'break-word', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {inq.message}
                           </div>
                           {inq.adminReply && (
-                            <div style={{ fontSize: '0.7rem', color: '#059669', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <CheckCircle2 size={11} />
+                            <div style={{ fontSize: '0.725rem', color: '#34D399', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <CheckCircle2 size={12} />
                               <span>Has internal reply</span>
                             </div>
                           )}
                         </td>
 
-                        <td style={{ padding: '14px 16px' }}>
-                          <span style={{
-                            display: 'inline-block',
-                            background: statusColor.bg,
-                            color: statusColor.text,
-                            border: `1px solid ${statusColor.border}`,
-                            padding: '3px 10px',
-                            borderRadius: '12px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600
-                          }}>
-                            {inq.status || 'New'}
-                          </span>
+                        <td>
+                          {inq.status === 'Resolved' ? (
+                            <span className="badge badge-green">
+                              <CheckCircle2 size={11} />
+                              <span>Resolved</span>
+                            </span>
+                          ) : inq.status === 'In Progress' ? (
+                            <span className="badge badge-cyan">
+                              <Clock size={11} />
+                              <span>In Progress</span>
+                            </span>
+                          ) : (
+                            <span className="badge badge-amber">
+                              <AlertTriangle size={11} />
+                              <span>New</span>
+                            </span>
+                          )}
                         </td>
 
-                        <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                        <td style={{ textAlign: 'right' }}>
                           <button
                             onClick={() => handleOpenDetail(inq.inquiryId)}
                             className="btn btn-secondary btn-sm"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            title="Review and update inquiry"
                           >
                             <Eye size={13} />
                             <span>Review</span>
@@ -617,36 +558,31 @@ export default function AdminDashboardPage({ navigate }) {
           )}
 
           {/* Pagination Controls */}
-          <div style={{
-            padding: '14px 20px',
-            borderTop: '1px solid #E2E8F0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#F8FAF9'
-          }}>
-            <div style={{ fontSize: '0.8rem', color: '#64748B' }}>
-              Showing {inquiries.length} of {pagination.total} inquiries
+          <div className="pagination-bar">
+            <div>
+              Showing <strong style={{ color: 'var(--color-text-main)' }}>{inquiries.length}</strong> of{' '}
+              <strong style={{ color: 'var(--color-text-main)' }}>{pagination.total}</strong> inquiries
             </div>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="pagination-controls">
               <button
                 onClick={() => loadInquiries(pagination.page - 1)}
                 disabled={pagination.page <= 1 || loading}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '6px 12px', gap: '4px' }}
+                className="pagination-btn"
               >
-                <ChevronLeft size={15} />
+                <ChevronLeft size={14} />
                 <span>Previous</span>
               </button>
+              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', padding: '0 8px' }}>
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
               <button
                 onClick={() => loadInquiries(pagination.page + 1)}
                 disabled={pagination.page >= pagination.totalPages || loading}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '6px 12px', gap: '4px' }}
+                className="pagination-btn"
               >
                 <span>Next</span>
-                <ChevronRight size={15} />
+                <ChevronRight size={14} />
               </button>
             </div>
           </div>
@@ -656,65 +592,74 @@ export default function AdminDashboardPage({ navigate }) {
         {selectedInquiry && (
           <div style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             zIndex: 1000,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '20px'
+            padding: '16px'
           }}>
             <div style={{
-              background: '#FFFFFF',
+              background: 'var(--color-bg-surface)',
+              border: '1px solid var(--color-border)',
               borderRadius: '12px',
               maxWidth: '720px',
               width: '100%',
               maxHeight: '90vh',
               overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+              boxShadow: 'var(--shadow-elevated)',
               position: 'relative',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              color: 'var(--color-text-main)'
             }}>
               {/* Modal Header */}
               <div style={{
-                padding: '20px 24px',
-                borderBottom: '1px solid #E2E8F0',
+                padding: '18px 24px',
+                borderBottom: '1px solid var(--color-border)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 position: 'sticky',
                 top: 0,
-                background: '#FFFFFF',
+                background: 'var(--color-bg-surface)',
                 zIndex: 10
               }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1.1rem', color: '#0F766E' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '1.1rem', color: '#14B8A6' }}>
                       {selectedInquiry.inquiryId}
                     </span>
-                    <span style={{
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      background: selectedInquiry.status === 'Resolved' ? '#DCFCE7' : selectedInquiry.status === 'In Progress' ? '#DBEAFE' : '#FEF3C7',
-                      color: selectedInquiry.status === 'Resolved' ? '#166534' : selectedInquiry.status === 'In Progress' ? '#1E40AF' : '#92400E'
-                    }}>
-                      {selectedInquiry.status}
-                    </span>
+                    {selectedInquiry.status === 'Resolved' ? (
+                      <span className="badge badge-green">
+                        <CheckCircle2 size={11} />
+                        <span>Resolved</span>
+                      </span>
+                    ) : selectedInquiry.status === 'In Progress' ? (
+                      <span className="badge badge-cyan">
+                        <Clock size={11} />
+                        <span>In Progress</span>
+                      </span>
+                    ) : (
+                      <span className="badge badge-amber">
+                        <AlertTriangle size={11} />
+                        <span>New</span>
+                      </span>
+                    )}
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
                     Submitted {selectedInquiry.createdAt ? new Date(selectedInquiry.createdAt).toLocaleString('en-IN') : 'N/A'}
                   </div>
                 </div>
 
                 <button
                   onClick={() => setSelectedInquiry(null)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', padding: '6px' }}
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: 'var(--color-text-secondary)', padding: '6px' }}
+                  aria-label="Close dialog"
                 >
                   <X size={20} />
                 </button>
@@ -743,59 +688,61 @@ export default function AdminDashboardPage({ navigate }) {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                   gap: '12px',
-                  background: '#F8FAF9',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid var(--color-border)',
                   padding: '16px',
                   borderRadius: '8px',
                   marginBottom: '20px'
                 }}>
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Submitter Name</div>
-                    <div style={{ fontWeight: 600, color: '#0F382A', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Submitter Name</div>
+                    <div style={{ fontWeight: 600, color: 'var(--color-text-main)', marginTop: '2px' }}>
                       {selectedInquiry.name}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Email Address</div>
-                    <div style={{ fontWeight: 600, color: '#0F382A', marginTop: '2px' }}>
-                      <a href={`mailto:${selectedInquiry.email}`} style={{ color: '#0D9488', textDecoration: 'none' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Email Address</div>
+                    <div style={{ fontWeight: 600, marginTop: '2px' }}>
+                      <a href={`mailto:${selectedInquiry.email}`} style={{ color: '#14B8A6' }}>
                         {selectedInquiry.email}
                       </a>
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Category</div>
-                    <div style={{ fontWeight: 600, color: '#0F382A', marginTop: '2px' }}>
-                      {selectedInquiry.category}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Category</div>
+                    <div style={{ marginTop: '2px' }}>
+                      <span className="badge badge-neutral">{selectedInquiry.category}</span>
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>District / Location</div>
-                    <div style={{ fontWeight: 600, color: '#0F382A', marginTop: '2px' }}>
-                      {selectedInquiry.location || 'Not Specified'}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>District / Location</div>
+                    <div style={{ fontWeight: 500, color: 'var(--color-text-main)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={12} className="text-slate-400" />
+                      <span>{selectedInquiry.location || 'Not Specified'}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Subject & Message */}
                 <div style={{ marginBottom: '24px' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
                     Subject
                   </div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F382A', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '14px' }}>
                     {selectedInquiry.subject}
                   </div>
 
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
                     Full Inquiry Message
                   </div>
                   <div style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #DDE5E1',
+                    background: 'rgba(0, 0, 0, 0.25)',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     padding: '16px',
                     fontSize: '0.9rem',
                     lineHeight: 1.6,
-                    color: '#334155',
+                    color: 'var(--color-text-body)',
                     whiteSpace: 'pre-wrap'
                   }}>
                     {selectedInquiry.message}
@@ -805,7 +752,8 @@ export default function AdminDashboardPage({ navigate }) {
                 {/* Quick Status Update Selector */}
                 <div style={{
                   padding: '16px',
-                  background: '#F1F5F9',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '8px',
                   marginBottom: '24px',
                   display: 'flex',
@@ -815,26 +763,31 @@ export default function AdminDashboardPage({ navigate }) {
                   gap: '12px'
                 }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1E293B' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-main)' }}>
                       Change Investigation Status
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                       Update the triage phase for this inquiry
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    {['New', 'In Progress', 'Resolved'].map((st) => (
-                      <button
-                        key={st}
-                        onClick={() => handleStatusChange(st)}
-                        disabled={updating || selectedInquiry.status === st}
-                        className={selectedInquiry.status === st ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'}
-                        style={{ fontSize: '0.75rem' }}
-                      >
-                        {st}
-                      </button>
-                    ))}
+                    {['New', 'In Progress', 'Resolved'].map((st) => {
+                      const isActive = selectedInquiry.status === st;
+                      return (
+                        <button
+                          key={st}
+                          onClick={() => handleStatusChange(st)}
+                          disabled={updating || isActive}
+                          className={isActive ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'}
+                        >
+                          {st === 'Resolved' && <CheckCircle2 size={12} />}
+                          {st === 'In Progress' && <Clock size={12} />}
+                          {st === 'New' && <AlertTriangle size={12} />}
+                          <span>{st}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -845,27 +798,29 @@ export default function AdminDashboardPage({ navigate }) {
                       <label className="form-label" style={{ marginBottom: 0 }}>
                         Internal Recorded Reply & Audit Notes
                       </label>
-                      <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                         MongoDB Persistent Record
                       </span>
                     </div>
 
                     <div style={{
-                      background: '#FFFBEB',
-                      border: '1px solid #FDE68A',
+                      background: 'rgba(217, 119, 6, 0.1)',
+                      border: '1px solid rgba(217, 119, 6, 0.25)',
                       borderRadius: '6px',
-                      padding: '8px 12px',
+                      padding: '10px 14px',
                       fontSize: '0.75rem',
-                      color: '#92400E',
-                      marginBottom: '10px'
+                      color: 'var(--color-status-amber-text)',
+                      marginBottom: '12px',
+                      lineHeight: 1.5
                     }}>
                       <strong>Notice: </strong>
                       External SMTP email delivery is not configured. Replies saved here are strictly recorded internally in the persistent MongoDB Atlas database for administrative logging and audit tracking.
                     </div>
 
                     <textarea
-                      className="form-textarea"
+                      className="filter-control"
                       rows={4}
+                      style={{ width: '100%', resize: 'vertical', lineHeight: 1.5 }}
                       placeholder="Record investigation findings, resolution notes, or administrative reply..."
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
@@ -875,13 +830,14 @@ export default function AdminDashboardPage({ navigate }) {
                   {selectedInquiry.adminReply && selectedInquiry.repliedAt && (
                     <div style={{
                       fontSize: '0.75rem',
-                      color: '#64748B',
+                      color: 'var(--color-text-secondary)',
                       marginBottom: '16px',
-                      padding: '8px 12px',
-                      background: '#F8FAF9',
+                      padding: '10px 14px',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid var(--color-border)',
                       borderRadius: '6px'
                     }}>
-                      Last recorded reply saved by <strong>{selectedInquiry.repliedBy || 'Administrator'}</strong> on {new Date(selectedInquiry.repliedAt).toLocaleString('en-IN')}.
+                      Last recorded reply saved by <strong style={{ color: '#14B8A6' }}>{selectedInquiry.repliedBy || 'Administrator'}</strong> on {new Date(selectedInquiry.repliedAt).toLocaleString('en-IN')}.
                     </div>
                   )}
 

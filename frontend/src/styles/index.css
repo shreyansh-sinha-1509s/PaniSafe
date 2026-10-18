@@ -98,6 +98,8 @@ html, body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+  scroll-padding-top: 100px;
 }
 
 #root {
@@ -376,7 +378,9 @@ button, input, select, textarea {
 
 .form-control,
 .form-select,
-.input {
+.input,
+.form-input,
+.filter-control {
   width: 100%;
   padding: 8px 14px;
   font-family: var(--font-body);
@@ -385,25 +389,70 @@ button, input, select, textarea {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: #F8FAFC;
+  color-scheme: dark;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: #F8FAFC;
+  color-scheme: dark;
+  resize: vertical;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-control::placeholder,
-.input::placeholder {
+.input::placeholder,
+.form-input::placeholder,
+.form-textarea::placeholder,
+.filter-control::placeholder {
   color: var(--color-text-muted);
 }
 
 .form-control:focus,
 .form-select:focus,
-.input:focus {
+.input:focus,
+.form-input:focus,
+.form-textarea:focus,
+.filter-control:focus {
   outline: none;
   border-color: var(--color-teal);
   box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25);
 }
 
-.form-select option {
+.form-select option,
+.filter-control option,
+select option {
   background: #0E1520;
   color: #F8FAFC;
+}
+
+/* Dark themed native date & time picker widgets */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 /* Badges — Subdued, High-Legibility */
@@ -483,11 +532,12 @@ button, input, select, textarea {
 }
 
 .data-table tbody tr {
+  background: var(--color-bg-surface);
   transition: background-color 0.15s ease;
 }
 
 .data-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-bg-card-hover);
 }
 
 /* Slide-over Drawer */
