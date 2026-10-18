@@ -107,6 +107,9 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Export Express app for Vercel serverless functions and testing
+export default app;
+
 // Initialize Data Engine and start server
 async function startServer() {
   try {
@@ -125,4 +128,11 @@ async function startServer() {
   }
 }
 
-startServer();
+const isMainScript = process.argv[1] && (
+  process.argv[1] === fileURLToPath(import.meta.url) ||
+  process.argv[1].replace(/\\/g, '/').endsWith('backend/src/server.js')
+);
+
+if (isMainScript && !process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+  startServer();
+}
