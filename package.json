@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Pani Safe Groundwater Quality Monitoring & Risk Screening Platform for IBM Z Datathon 2026",
   "private": true,
+  "type": "module",
   "workspaces": [
     "backend",
     "frontend"
@@ -17,6 +18,15 @@
     "build": "npm --prefix frontend run build",
     "test": "npm --prefix backend test",
     "dev": "node -e \"const { spawn } = require('child_process'); spawn('npm', ['--prefix', 'backend', 'run', 'dev'], { stdio: 'inherit', shell: true }); spawn('npm', ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', shell: true });\""
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.7.0"
   },
   "keywords": [
     "groundwater",
