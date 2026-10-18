@@ -14,6 +14,7 @@ import MethodologyPage from './pages/MethodologyPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -71,8 +72,10 @@ export default function App() {
     pageContent = <AboutPage navigate={navigate} />;
   } else if (currentPath === '/contact') {
     pageContent = <ContactPage navigate={navigate} />;
-  } else if (currentPath === '/login') {
+  } else if (currentPath === '/login' || currentPath === '/admin/login') {
     pageContent = <LoginPage navigate={navigate} />;
+  } else if (currentPath === '/admin' || currentPath === '/admin/dashboard') {
+    pageContent = <AdminDashboardPage navigate={navigate} />;
   } else if (currentPath === '/register') {
     pageContent = <RegisterPage navigate={navigate} />;
   } else {

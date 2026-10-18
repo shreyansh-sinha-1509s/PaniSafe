@@ -41,3 +41,5 @@ desktop.ini
 # Temporary test outputs
 tmp/
 scratch/
+.vercel/
+frontend/dist/

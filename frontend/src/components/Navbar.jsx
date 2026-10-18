@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 import { fetchHealth } from '../services/api';
-import { Menu, X, LogOut, LogIn, Cpu, ShieldCheck } from 'lucide-react';
+import { Menu, X, LogOut, Cpu, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 export default function Navbar({ currentPath, navigate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, logout, demoLogin, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const [telemetry, setTelemetry] = useState({
     arch: null,
     nodeVersion: null,
@@ -113,19 +113,18 @@ export default function Navbar({ currentPath, navigate }) {
           })}
         </nav>
 
-        {/* User / Demo Auth Buttons */}
+        {/* Admin Section */}
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <div className="border border-white/15 bg-white/[0.04] rounded-full px-3.5 py-1 text-xs text-slate-200 flex items-center gap-2 font-body backdrop-blur-md">
-                <ShieldCheck size={14} className="text-[#00E5FF]" />
-                <span className="font-medium text-white">{user?.fullName || 'Analyst'}</span>
-                {user?.isDemoAccount && (
-                  <span className="bg-[#00E5FF]/15 text-[#00E5FF] text-[10px] px-2 py-0.5 rounded-full font-medium">
-                    Demo
-                  </span>
-                )}
-              </div>
+              <button
+                onClick={() => handleNav('/admin')}
+                className="border border-[#00E5FF]/40 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-[#00E5FF] rounded-full px-3.5 py-1.5 text-xs font-medium font-body flex items-center gap-1.5 transition-colors cursor-pointer backdrop-blur-md"
+                title="Admin Dashboard"
+              >
+                <ShieldAlert size={13} className="text-[#00E5FF]" />
+                <span className="font-medium text-white">Admin Dashboard</span>
+              </button>
               <button
                 onClick={logout}
                 className="border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] rounded-full w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
@@ -135,20 +134,14 @@ export default function Navbar({ currentPath, navigate }) {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <button
-                onClick={() => demoLogin().then(() => handleNav('/dashboard'))}
-                className="border border-white/15 hover:border-white/25 bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 rounded-full px-4 py-1.5 text-xs font-medium font-body transition-colors cursor-pointer backdrop-blur-md"
-                title="Quick 1-click login as Demo Analyst"
+                onClick={() => handleNav('/admin/login')}
+                className="bg-[#00E5FF]/20 hover:bg-[#00E5FF]/30 text-[#00E5FF] border border-[#00E5FF]/40 rounded-full px-4 py-1.5 text-xs font-medium font-body flex items-center gap-1.5 transition-colors cursor-pointer backdrop-blur-md"
+                title="Administrator access to inquiry database"
               >
-                Demo Access
-              </button>
-              <button
-                onClick={() => handleNav('/login')}
-                className="bg-[#00E5FF]/20 hover:bg-[#00E5FF]/30 text-[#00E5FF] border border-[#00E5FF]/40 rounded-full px-4 py-1.5 text-xs font-medium font-body flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <LogIn size={13} />
-                <span>Sign In</span>
+                <ShieldAlert size={13} />
+                <span>Admin Sign In</span>
               </button>
             </div>
           )}

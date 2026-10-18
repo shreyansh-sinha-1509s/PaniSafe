@@ -129,3 +129,103 @@ export async function fetchCurrentUser(token) {
   if (!res.ok) throw new Error(data.error || 'Failed to load user');
   return data;
 }
+
+// Admin Authentication & Session API
+export async function adminLogin(email, password) {
+  const res = await fetch(`${BASE_URL}/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Admin authentication failed');
+  return data;
+}
+
+export async function adminLogout() {
+  const res = await fetch(`${BASE_URL}/admin/logout`, {
+    method: 'POST',
+    credentials: 'include'
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Logout failed');
+  return data;
+}
+
+export async function fetchAdminMe(token) {
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE_URL}/admin/me`, {
+    credentials: 'include',
+    headers
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Failed to verify admin session');
+  return data;
+}
+
+// Protected Admin Inquiries Management API
+export async function fetchAdminInquiries(params = {}, token) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== '') {
+      query.append(key, val);
+    }
+  });
+
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}/admin/inquiries?${query.toString()}`, {
+    credentials: 'include',
+    headers
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Failed to load inquiries');
+  return data;
+}
+
+export async function fetchAdminInquiryById(id, token) {
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}/admin/inquiries/${encodeURIComponent(id)}`, {
+    credentials: 'include',
+    headers
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Failed to load inquiry details');
+  return data;
+}
+
+export async function updateAdminInquiryStatus(id, status, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}/admin/inquiries/${encodeURIComponent(id)}/status`, {
+    method: 'PATCH',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify({ status })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Failed to update inquiry status');
+  return data;
+}
+
+export async function recordAdminInquiryReply(id, replyMessage, status, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}/admin/inquiries/${encodeURIComponent(id)}/reply`, {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify({ replyMessage, status })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || data.error || 'Failed to record reply');
+  return data;
+}
+

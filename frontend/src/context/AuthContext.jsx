@@ -53,12 +53,8 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  const demoLogin = async () => {
-    return login('analyst.demo@panisafe.in', 'Datathon2026!');
-  };
-
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, demoLogin, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAuthenticated: !!user, isAdmin: Boolean(user?.role === 'admin' || user?.email === 'admin@panisafe.in' || user?.email === 'judge@panisafe.in') }}>
       {children}
     </AuthContext.Provider>
   );
