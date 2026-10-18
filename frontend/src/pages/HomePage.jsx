@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import FadingVideo from '../components/FadingVideo';
 import BlurText from '../components/BlurText';
 import { fetchSummary } from '../services/api';
 import {
@@ -14,11 +13,39 @@ import {
   BarChart2,
   CheckCircle2
 } from 'lucide-react';
-import groundwaterHeroFallback from '../assets/groundwater-hero-fallback.jpg';
 
 export default function HomePage({ navigate }) {
   const [summaryData, setSummaryData] = useState(null);
   const [_loadingSummary, setLoadingSummary] = useState(true);
+  const [heroVideoFailed, setHeroVideoFailed] = useState(false);
+  const [capabilitiesVideoFailed, setCapabilitiesVideoFailed] = useState(false);
+
+  const heroVideoRef = useRef(null);
+  const capabilitiesVideoRef = useRef(null);
+
+  useEffect(() => {
+    [heroVideoRef, capabilitiesVideoRef].forEach((ref) => {
+      if (ref.current) {
+        ref.current.defaultMuted = true;
+        ref.current.muted = true;
+        const playPromise = ref.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn('Video playback unassisted or delayed:', err);
+          });
+        }
+      }
+    });
+  }, [heroVideoFailed, capabilitiesVideoFailed]);
+
+  // Prevent blank/black flash by cleanly restarting loop slightly before true EOF
+  const handleSeamlessLoop = (e) => {
+    const video = e.target;
+    if (video.duration && video.currentTime >= video.duration - 0.08) {
+      video.currentTime = 0.01;
+      video.play().catch(() => {});
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -54,20 +81,54 @@ export default function HomePage({ navigate }) {
       {/* =====================================================================
           SECTION 1: HERO
           ===================================================================== */}
-      <section className="relative min-h-[90vh] w-full overflow-hidden flex flex-col justify-between select-none">
-        {/* Background Atmospheric Water Video Loop */}
-        <FadingVideo
-          src={[
-            'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260619_191346_9d19d66e-86a4-47f7-8dc6-712c1788c3b2.mp4',
-            '/hero-water-bg.mp4'
-          ]}
-          fallbackSrc={groundwaterHeroFallback}
-          className="absolute inset-0 h-full w-full object-cover pointer-events-none"
-          targetOpacity={0.42}
+      <section
+        className="relative w-full overflow-hidden isolate flex flex-col justify-center select-none bg-[#070B11] pt-28 pb-16 sm:pt-32 sm:pb-20 m-0"
+        style={{ minHeight: '100svh' }}
+      >
+        {/* Full-bleed isolated background video for Hero */}
+        {!heroVideoFailed && (
+          <video
+            ref={heroVideoRef}
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260619_191346_9d19d66e-86a4-47f7-8dc6-712c1788c3b2.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            onTimeUpdate={handleSeamlessLoop}
+            onEnded={(e) => {
+              e.target.currentTime = 0.01;
+              e.target.play().catch(() => {});
+            }}
+            onError={() => setHeroVideoFailed(true)}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              opacity: 1,
+              filter: 'none',
+              zIndex: 0
+            }}
+            className="pointer-events-none"
+          />
+        )}
+
+        {/* Subtle neutral-black overlay for text contrast (no color tinting) */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.35)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
         />
 
-        {/* Hero Main Content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center pt-14 pb-12 px-4 sm:px-6 text-center max-w-4xl mx-auto">
+        {/* Hero Main Content Grid */}
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center">
           {/* Restrained Provenance Label */}
           <motion.div
             initial={sharedMotion.initial}
@@ -86,7 +147,7 @@ export default function HomePage({ navigate }) {
           </motion.div>
 
           {/* Hero Headline */}
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <BlurText
               text="Groundwater Intelligence & Hydrochemical Risk Screening"
               className="text-4xl sm:text-6xl md:text-[4.25rem] font-heading italic text-white tracking-[-1.5px] leading-[1.05]"
@@ -150,12 +211,12 @@ export default function HomePage({ navigate }) {
             </button>
           </motion.div>
 
-          {/* Live Data Summary Cards */}
+          {/* Live Data Summary Cards Aligned to Same Max Width */}
           <motion.div
             initial={sharedMotion.initial}
             animate={sharedMotion.animate}
             transition={{ ...sharedMotion.transition, delay: 0.7 }}
-            className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl"
+            className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full"
           >
             {/* Metric 1 */}
             <div className="liquid-glass rounded-2xl p-5 text-left border border-white/10">
@@ -214,85 +275,130 @@ export default function HomePage({ navigate }) {
             </div>
           </motion.div>
         </div>
-
-        {/* Ambient Bottom Fade Anchor */}
-        <div className="h-4 w-full bg-gradient-to-t from-[#070B11] to-transparent pointer-events-none" />
       </section>
 
       {/* =====================================================================
-          SECTION 2: HOW SCREENING WORKS (Methodology & Standards)
+          SECTION 2: HOW SCREENING WORKS (Methodology & Standards / Platform Capabilities)
           ===================================================================== */}
-      <section className="relative py-16 px-4 sm:px-6 max-w-6xl mx-auto">
-        <div className="mb-10 text-center md:text-left md:flex items-end justify-between border-b border-white/8 pb-6">
-          <div>
-            <div className="text-xs font-medium text-teal-400 uppercase tracking-wider mb-1.5">
-              Screening Methodology
-            </div>
-            <h2 className="font-heading italic text-2xl sm:text-3xl text-slate-100">
-              Decision-Support Architecture
-            </h2>
-          </div>
-          <p className="mt-2 md:mt-0 text-xs sm:text-sm text-slate-400 max-w-md font-light">
-            Designed to assist public health hydrologists and municipal planners in prioritizing water sources for accredited laboratory chemical testing.
-          </p>
-        </div>
+      <section
+        className="relative w-full overflow-hidden isolate flex flex-col justify-center select-none bg-[#070B11] py-20 sm:py-24 m-0"
+        style={{ minHeight: '100svh' }}
+      >
+        {/* Full-bleed isolated background video for capabilities section */}
+        {!capabilitiesVideoFailed && (
+          <video
+            ref={capabilitiesVideoRef}
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260622_093722_ccfc7ebf-182f-419f-8a62-2dc02db7dd9d.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            onTimeUpdate={handleSeamlessLoop}
+            onEnded={(e) => {
+              e.target.currentTime = 0.01;
+              e.target.play().catch(() => {});
+            }}
+            onError={() => setCapabilitiesVideoFailed(true)}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              opacity: 1,
+              filter: 'none',
+              zIndex: 0
+            }}
+            className="pointer-events-none"
+          />
+        )}
 
-        {/* 3 Pillar Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Card 1 */}
-          <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+        {/* Subtle neutral-black overlay for text contrast (no color tinting) */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+
+        {/* Section 2 Main Content Grid */}
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center md:text-left md:flex items-end justify-between border-b border-white/8 pb-6">
             <div>
-              <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-3.5">
-                <Droplets size={18} />
+              <div className="text-xs font-medium text-teal-400 uppercase tracking-wider mb-1.5">
+                Screening Methodology
               </div>
-              <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
-                Hydrochemical Threshold Screening
-              </h3>
-              <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
-                Measures groundwater pH against the strict <strong>BIS IS 10500:2012</strong> acceptable range of <strong>6.5 – 8.5</strong> (no relaxation). Total Dissolved Solids (TDS) are screened against the <strong>500 mg/L</strong> desirable threshold and <strong>2,000 mg/L</strong> permissible limit.
-              </p>
+              <h2 className="font-heading italic text-2xl sm:text-3xl text-slate-100">
+                Decision-Support Architecture
+              </h2>
             </div>
-            <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
-              <span>Standard: BIS IS 10500</span>
-              <span className="text-teal-400 font-medium">2 Parameters Screened</span>
-            </div>
+            <p className="mt-2 md:mt-0 text-xs sm:text-sm text-slate-400 max-w-md font-light">
+              Designed to assist public health hydrologists and municipal planners in prioritizing water sources for accredited laboratory chemical testing.
+            </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-3.5">
-                <Database size={18} />
+          {/* 3 Pillar Cards Aligned to Same Max Width */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 w-full">
+            {/* Card 1 */}
+            <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+              <div>
+                <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-3.5">
+                  <Droplets size={18} />
+                </div>
+                <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
+                  Hydrochemical Threshold Screening
+                </h3>
+                <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
+                  Measures groundwater pH against the strict <strong>BIS IS 10500:2012</strong> acceptable range of <strong>6.5 – 8.5</strong> (no relaxation). Total Dissolved Solids (TDS) are screened against the <strong>500 mg/L</strong> desirable threshold and <strong>2,000 mg/L</strong> permissible limit.
+                </p>
               </div>
-              <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
-                Station Disambiguation & Null Integrity
-              </h3>
-              <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
-                Identifies stations using composite indexing <code>(District + Tehsil + Station)</code>, preventing duplicate naming collisions across talukas. Preserves missing measurements as true analytical nulls rather than corrupting distributions with synthetic zero values.
-              </p>
+              <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Standard: BIS IS 10500</span>
+                <span className="text-teal-400 font-medium">2 Parameters Screened</span>
+              </div>
             </div>
-            <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
-              <span>Index: 1,804 Stations</span>
-              <span className="text-emerald-400 font-medium">95% Data Quality Index</span>
-            </div>
-          </div>
 
-          {/* Card 3 */}
-          <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-3.5">
-                <AlertTriangle size={18} />
+            {/* Card 2 */}
+            <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+              <div>
+                <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-3.5">
+                  <Database size={18} />
+                </div>
+                <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
+                  Station Disambiguation & Null Integrity
+                </h3>
+                <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
+                  Identifies stations using composite indexing <code>(District + Tehsil + Station)</code>, preventing duplicate naming collisions across talukas. Preserves missing measurements as true analytical nulls rather than corrupting distributions with synthetic zero values.
+                </p>
               </div>
-              <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
-                Actionable Field Triage Queue
-              </h3>
-              <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
-                Flags records where either parameter exceeds established standards with <strong>Review Recommended</strong>. Classifies severity into dual-flag alerts (both pH and TDS breached) or single-parameter prompts, directly accelerating municipal laboratory follow-up.
-              </p>
+              <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Index: 1,804 Stations</span>
+                <span className="text-emerald-400 font-medium">95% Data Quality Index</span>
+              </div>
             </div>
-            <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
-              <span>Triage Queue</span>
-              <span className="text-amber-400 font-medium">2,865 Flagged Records</span>
+
+            {/* Card 3 */}
+            <div className="card p-5.5 flex flex-col justify-between border border-white/8 hover:border-white/14 transition-colors">
+              <div>
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-3.5">
+                  <AlertTriangle size={18} />
+                </div>
+                <h3 className="font-body font-semibold text-base text-slate-100 mb-2">
+                  Actionable Field Triage Queue
+                </h3>
+                <p className="text-xs text-slate-300 font-light leading-relaxed mb-4">
+                  Flags records where either parameter exceeds established standards with <strong>Review Recommended</strong>. Classifies severity into dual-flag alerts (both pH and TDS breached) or single-parameter prompts, directly accelerating municipal laboratory follow-up.
+                </p>
+              </div>
+              <div className="pt-3.5 border-t border-white/6 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Triage Queue</span>
+                <span className="text-amber-400 font-medium">2,865 Flagged Records</span>
+              </div>
             </div>
           </div>
         </div>
@@ -301,7 +407,7 @@ export default function HomePage({ navigate }) {
       {/* =====================================================================
           SECTION 3: INTERACTIVE PLATFORM EXPLORATION
           ===================================================================== */}
-      <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="card p-6 md:p-8 border border-white/8 bg-[#0E1520]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
@@ -377,7 +483,7 @@ export default function HomePage({ navigate }) {
       {/* =====================================================================
           SECTION 4: DATA LIMITATION & PROVENANCE NOTICE
           ===================================================================== */}
-      <section className="py-10 px-4 sm:px-6 max-w-6xl mx-auto">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="card p-5 md:p-6 border border-amber-500/25 bg-[#0E1520]">
           <div className="flex items-start gap-3.5">
             <div className="w-8 h-8 rounded-md bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
